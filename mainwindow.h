@@ -45,8 +45,8 @@ class MainWindow : public QMainWindow {
 	QCommonStyle *style;
 	QLabel *widthLabel;
 	QLabel *heightLabel;
-	QPushButton *generate;
-    QPushButton *surrender;
+    QPushButton *startstopButton;
+    QPushButton *toggleSolutionButton;
 	QSignalMapper *mapperLeftButton;
 	QSignalMapper *mapperRightButton;
     vector<PushButton*> puzzle;
@@ -55,7 +55,7 @@ class MainWindow : public QMainWindow {
 	vector<size_t> **yAxisClue;
 	vector<int> status;
     int width, height, mouseButton, newStatus;
-    bool firstClick, solutionShown;
+    bool firstClick, solutionShown, gameRunning;
 	Nonogram *ngram;
 	void cleanUp();
 
@@ -64,10 +64,11 @@ class MainWindow : public QMainWindow {
 	~MainWindow();
 
  private slots:
-	void generatePuzzle();
+    void startstop();
+    void startPuzzle();
     void HideSolution();
     void ShowSolution();
-    void ToggleSolution();
+    void toggleSolution();
     void paintPosition(int position, int status);
     void clicked(int position);
     void leftClicked(int position);

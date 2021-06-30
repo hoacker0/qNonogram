@@ -31,11 +31,11 @@ MainWindow::MainWindow(QWidget *parent) {
 	heightBox->setValue(DEFAULT_PUZZLE_SIZE);
 	widthLabel = new QLabel(tr("Columns:"), window);
 	heightLabel = new QLabel(tr("Rows:"), window);
-	generate = new QPushButton(tr("Generate puzzle"), this);
-	connect(generate, SIGNAL(clicked()), this, SLOT(generatePuzzle()));
-    surrender = new QPushButton(tr("Show solution"), this);
-    connect(surrender, SIGNAL(clicked()), this, SLOT(ToggleSolution()));
-	surrender->setEnabled(false);
+    startstopButton = new QPushButton(tr("New puzzle"), this);
+    connect(startstopButton, SIGNAL(clicked()), this, SLOT(startstop()));
+    toggleSolutionButton = new QPushButton(tr("Show solution"), this);
+    connect(toggleSolutionButton, SIGNAL(clicked()), this, SLOT(toggleSolution()));
+    toggleSolutionButton->setEnabled(false);
 	ngram = NULL;
 
 	window->setLayout(layout);
@@ -44,11 +44,14 @@ MainWindow::MainWindow(QWidget *parent) {
 	top->addWidget(heightBox);
 	top->addWidget(widthLabel);
 	top->addWidget(widthBox);
-	top->addWidget(generate);
-	top->addWidget(surrender);
+    top->addWidget(startstopButton);
+    top->addWidget(toggleSolutionButton);
 	layout->addSpacing(20);
 	layout->addLayout(top);
 	layout->addLayout(grid);
+
+    solutionShown = false;
+    gameRunning = false;
 }
 
 MainWindow::~MainWindow() {
@@ -61,14 +64,49 @@ MainWindow::~MainWindow() {
 	window = NULL;
 }
 
+void MainWindow::startstop() {
+    if (gameRunning) {
+        // game is running and shall be stopped/ended
+
+        // ask again
+        // ** TODO: ask popup "Sure?"**
+
+        // if confirmed
+        gameRunning = false;
+
+        widthBox->setEnabled(true);
+        heightBox->setEnabled(true);
+        startstopButton->setText("New puzzle");
+
+        ShowSolution();
+
+        toggleSolutionButton->setEnabled(false);
+        solutionShown = true;
+        toggleSolutionButton->setText("Hide solution");
+    }
+    else {
+        // new game to be started
+        gameRunning = true;
+
+        widthBox->setEnabled(false);
+        heightBox->setEnabled(false);
+        startstopButton->setText("Quit puzzle");
+
+        toggleSolutionButton->setEnabled(true);
+        solutionShown = false;
+        toggleSolutionButton->setText("Show solution");
+
+        startPuzzle();
+    }
+
+}
+
 // Generates, verifies and displays the puzzle and its graphical components.
-void MainWindow::generatePuzzle() {
+void MainWindow::startPuzzle() {
 	int pos, spacer_x, spacer_y;
 	// Start by disabling the buttons, so the user can't mess things up, as
 	// generating the puzzle can take some time. (Especially the big ones.)
-	widthBox->setEnabled(false);
-	heightBox->setEnabled(false);
-	generate->setEnabled(false);
+
 	// If this isn't the first puzzle generated, we need to clean out the garbage.
 	// ngram will be a NULL pointer the first time, but defined on subsequent calls.
 	if (ngram) {
@@ -158,10 +196,6 @@ void MainWindow::generatePuzzle() {
 	}
     connect(mapperLeftButton, SIGNAL(mapped(int)), this, SLOT(leftClicked(int)));
     connect(mapperRightButton, SIGNAL(mapped(int)), this, SLOT(rightClicked(int)));
-	// Enable button that lets user see the solution without solving
-    surrender->setEnabled(true);
-    solutionShown = false;
-    surrender->setText("Show solution");
 }
 
 // Cleans up stuff before a new game is started
@@ -187,14 +221,14 @@ void MainWindow::cleanUp() {
 }
 
 // Toggle Solution shown/hidden
-void MainWindow::ToggleSolution() {
+void MainWindow::toggleSolution() {
 
     if (solutionShown) {
         HideSolution();
-        surrender->setText("Show solution");
+        toggleSolutionButton->setText("Show solution");
     } else {
         ShowSolution();
-        surrender->setText("Hide solution");
+        toggleSolutionButton->setText("Hide solution");
     }
     solutionShown = !solutionShown;
     return;
@@ -209,9 +243,6 @@ void MainWindow::HideSolution() {
             paintPosition(position, status.at(position));
         }
     }
-    widthBox->setEnabled(false);
-    heightBox->setEnabled(false);
-    generate->setEnabled(false);
 }
 
 
@@ -234,9 +265,6 @@ void MainWindow::ShowSolution() {
 			}
 		}
 	}
-	widthBox->setEnabled(true);
-	heightBox->setEnabled(true);
-	generate->setEnabled(true);
 }
 
 void MainWindow::paintPosition(int position, int status)  {
@@ -275,6 +303,9 @@ void MainWindow::clicked(int position) {
 // Called when left button is clicked or dragged over with button depressed.
 void MainWindow::leftClicked(int position) {
 
+    // If no game currently running, do nothing
+    if (!gameRunning) return;
+
     if (firstClick) {
         // single click or first click in draw action
         // determine new status and keep it until new "firstClick"
@@ -294,6 +325,9 @@ void MainWindow::leftClicked(int position) {
 
 // Called when right button is clicked or dragged over with button depressed.
 void MainWindow::rightClicked(int position) {
+
+    // If no game currently running, do nothing
+    if (!gameRunning) return;
 
     if (firstClick) {
         // single click or first click in draw action
@@ -339,7 +373,6 @@ void MainWindow::checkSolution() {
 	mb.exec();
 	widthBox->setEnabled(true);
 	heightBox->setEnabled(true);
-	generate->setEnabled(true);
 }
 
 void MainWindow::about() {
