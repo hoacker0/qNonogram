@@ -72,34 +72,46 @@ void MainWindow::startstop() {
         // ** TODO: ask popup "Sure?"**
 
         // if confirmed
-        gameRunning = false;
-
-        widthBox->setEnabled(true);
-        heightBox->setEnabled(true);
-        startstopButton->setText("New puzzle");
-
-        ShowSolution();
-
-        toggleSolutionButton->setEnabled(false);
-        solutionShown = true;
-        toggleSolutionButton->setText("Hide solution");
+        stopGame();
     }
     else {
         // new game to be started
-        gameRunning = true;
-
-        widthBox->setEnabled(false);
-        heightBox->setEnabled(false);
-        startstopButton->setText("Quit puzzle");
-
-        toggleSolutionButton->setEnabled(true);
-        solutionShown = false;
-        toggleSolutionButton->setText("Show solution");
-
-        startPuzzle();
+        startGame();
     }
 
 }
+
+void MainWindow::stopGame() {
+    gameRunning = false;
+
+    widthBox->setEnabled(true);
+    heightBox->setEnabled(true);
+    startstopButton->setText("New puzzle");
+
+    ShowSolution();
+
+    toggleSolutionButton->setEnabled(false);
+    solutionShown = true;
+    toggleSolutionButton->setText("Hide solution");
+
+    return;
+}
+
+void MainWindow::startGame() {
+    gameRunning = true;
+
+    widthBox->setEnabled(false);
+    heightBox->setEnabled(false);
+    startstopButton->setText("Quit puzzle");
+
+    toggleSolutionButton->setEnabled(true);
+    solutionShown = false;
+    toggleSolutionButton->setText("Show solution");
+
+    startPuzzle();
+    return;
+}
+
 
 // Generates, verifies and displays the puzzle and its graphical components.
 void MainWindow::startPuzzle() {
@@ -371,8 +383,7 @@ void MainWindow::checkSolution() {
 	mb.setWindowTitle(tr("Well done"));
 	mb.setText(tr("You have solved the puzzle!"));
 	mb.exec();
-	widthBox->setEnabled(true);
-	heightBox->setEnabled(true);
+    stopGame();
 }
 
 void MainWindow::about() {

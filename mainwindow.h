@@ -65,6 +65,8 @@ class MainWindow : public QMainWindow {
 
  private slots:
     void startstop();
+    void stopGame();
+    void startGame();
     void startPuzzle();
     void HideSolution();
     void ShowSolution();
