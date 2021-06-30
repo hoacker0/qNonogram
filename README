@@ -1,0 +1,23 @@
+GENERAL INFO:
+qNonogram is a puzzle game that will generate (semi)random nonogram puzzles, and allow the user to
+solve them. Please see https://en.wikipedia.org/wiki/Nonogram for more info on nonograms.
+qNonogram was initally forked from Nonogram-qt (https://github.com/dsuni/nonogram-qt).
+
+
+DEPENDENCIES:
+qNonogram requires Qt5 to work.
+
+LICENSE:
+Nonogram-qt and all its components is distributed under the GNU GPL v3 (or later). Please see the file
+"COPYING" for more details.
+
+INSTALLATION:
+In addition to a C++ compatible compiler (such as g++) & toolchain you need the Qt development libraries
+installed. Once you have these, simply run:
+
+qmake && make
+
+This should produce a stand-alone executable named "qnonogram". You can use this locally, or if you
+have admin privileges install it system wide by running e.g.
+
+sudo cp qnonogram /usr/bin
