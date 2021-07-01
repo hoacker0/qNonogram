@@ -84,7 +84,7 @@ class MainWindow : public QMainWindow {
     void toggleSolution();
 
     void paintPosition(int position, int state);
-    void setStatus(int position, int state);
+    void setStatus(int position, int state, bool addUndo);
     void leftClicked(int position);
     void rightClicked(int position);
 

@@ -331,7 +331,7 @@ void MainWindow::undo() {
 
     pStatus pState = undoStack.pop();
     addRedoStep(pState.position);
-    setStatus(pState.position, pState.status);
+    setStatus(pState.position, pState.status, false);
     return;
 }
 
@@ -341,11 +341,16 @@ void MainWindow::redo() {
 
     pStatus pState = redoStack.pop();
     addUndoStep(pState.position);
-    setStatus(pState.position, pState.status);
+    setStatus(pState.position, pState.status, false);
     return;
 }
 
-void MainWindow::setStatus(int position, int state) {
+void MainWindow::setStatus(int position, int state, bool addUndo) {
+
+    if (addUndo) {
+        addUndoStep(position);
+        redoStack.clear();
+    }
 
     status.at(position) = state;
     paintPosition(position, state);
@@ -371,9 +376,7 @@ void MainWindow::leftClicked(int position) {
     }
 
     // set new status at position
-    addUndoStep(position);
-    redoStack.clear();
-    setStatus(position, currentStatus);
+    setStatus(position, currentStatus, true);
     return;
 }
 
@@ -396,7 +399,7 @@ void MainWindow::rightClicked(int position) {
     }
 
     // set new status at position
-    setStatus(position, currentStatus);
+    setStatus(position, currentStatus, true);
     return;
 
 }
