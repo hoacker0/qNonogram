@@ -1,6 +1,6 @@
 #include "mainwindow.h"
 
-MainWindow::MainWindow(QWidget *parent) {
+MainWindow::MainWindow() {
 	window = new QWidget();
 	menu = new QMenuBar(window);
 	fileMenu = new QMenu(tr("&File"), window);
@@ -35,6 +35,10 @@ MainWindow::MainWindow(QWidget *parent) {
     connect(startstopButton, SIGNAL(clicked()), this, SLOT(startstop()));
     toggleSolutionButton = new QPushButton(tr("Show solution"), this);
     connect(toggleSolutionButton, SIGNAL(clicked()), this, SLOT(toggleSolution()));
+    undoButton = new QPushButton(tr("undo"), this);
+    connect(undoButton, SIGNAL(clicked()), this, SLOT(undo()));
+    redoButton = new QPushButton(tr("redo"), this);
+    connect(redoButton, SIGNAL(clicked()), this, SLOT(redo()));
     toggleSolutionButton->setEnabled(false);
 	ngram = NULL;
 
@@ -46,6 +50,8 @@ MainWindow::MainWindow(QWidget *parent) {
 	top->addWidget(widthBox);
     top->addWidget(startstopButton);
     top->addWidget(toggleSolutionButton);
+    top->addWidget(undoButton);
+    top->addWidget(redoButton);
 	layout->addSpacing(20);
 	layout->addLayout(top);
 	layout->addLayout(grid);
@@ -107,6 +113,9 @@ void MainWindow::startGame() {
     toggleSolutionButton->setEnabled(true);
     solutionShown = false;
     toggleSolutionButton->setText("Show solution");
+
+    undoStack.clear();
+    redoStack.clear();
 
     startPuzzle();
     return;
@@ -279,9 +288,9 @@ void MainWindow::ShowSolution() {
 	}
 }
 
-void MainWindow::paintPosition(int position, int status)  {
+void MainWindow::paintPosition(int position, int state)  {
 
-    switch (status) {
+    switch (state) {
     case STATUS_UNDECIDED:
         puzzle.at(position)->setText("");
         puzzle.at(position)->setStyleSheet("background-color: rgb(215, 215, 215)");
@@ -305,10 +314,41 @@ void MainWindow::paintPosition(int position, int status)  {
     return;
 }
 
-void MainWindow::clicked(int position) {
+void MainWindow::addUndoStep(int position) {
+    undoStack.push(pStatus{position, status.at(position)});
+    return;
+}
 
-    status.at(position) = newStatus;
-    paintPosition(position, newStatus);
+
+void MainWindow::addRedoStep(int position) {
+    redoStack.push(pStatus{position, status.at(position)});
+    return;
+}
+
+void MainWindow::undo() {
+
+    if (undoStack.isEmpty()) return;
+
+    pStatus pState = undoStack.pop();
+    addRedoStep(pState.position);
+    setStatus(pState.position, pState.status);
+    return;
+}
+
+void MainWindow::redo() {
+
+    if (redoStack.isEmpty()) return;
+
+    pStatus pState = redoStack.pop();
+    addUndoStep(pState.position);
+    setStatus(pState.position, pState.status);
+    return;
+}
+
+void MainWindow::setStatus(int position, int state) {
+
+    status.at(position) = state;
+    paintPosition(position, state);
     return;
 }
 
@@ -322,16 +362,18 @@ void MainWindow::leftClicked(int position) {
         // single click or first click in draw action
         // determine new status and keep it until new "firstClick"
         if (status.at(position) == STATUS_SOLID) {
-            newStatus = STATUS_UNDECIDED;
+            currentStatus = STATUS_UNDECIDED;
         }
         else {
-            newStatus = STATUS_SOLID;
+            currentStatus = STATUS_SOLID;
         }
         firstClick = false;
     }
 
     // set new status at position
-    clicked(position);
+    addUndoStep(position);
+    redoStack.clear();
+    setStatus(position, currentStatus);
     return;
 }
 
@@ -345,16 +387,16 @@ void MainWindow::rightClicked(int position) {
         // single click or first click in draw action
         // determine new status and keep it until new "firstClick"
         if (status.at(position) == STATUS_BLANK) {
-            newStatus = STATUS_UNDECIDED;
+            currentStatus = STATUS_UNDECIDED;
         }
         else {
-            newStatus = STATUS_BLANK;
+            currentStatus = STATUS_BLANK;
         }
         firstClick = false;
     }
 
     // set new status at position
-    clicked(position);
+    setStatus(position, currentStatus);
     return;
 
 }

@@ -14,6 +14,7 @@
 #include <QSignalMapper>
 #include <QString>
 #include <vector>
+#include <QStack>
 #include "pushbutton.h"
 #include "nonogram.h"
 
@@ -25,6 +26,11 @@
 #define STATUS_SOLID 0
 #define STATUS_HINT_BLANK 11
 #define STATUS_HINT_SOLID 10
+
+struct pStatus {
+    int position;
+    int status;
+};
 
 class MainWindow : public QMainWindow {
 	Q_OBJECT
@@ -47,6 +53,8 @@ class MainWindow : public QMainWindow {
 	QLabel *heightLabel;
     QPushButton *startstopButton;
     QPushButton *toggleSolutionButton;
+    QPushButton *undoButton;
+    QPushButton *redoButton;
 	QSignalMapper *mapperLeftButton;
 	QSignalMapper *mapperRightButton;
     vector<PushButton*> puzzle;
@@ -54,13 +62,14 @@ class MainWindow : public QMainWindow {
 	vector<size_t> **xAxisClue;
 	vector<size_t> **yAxisClue;
 	vector<int> status;
-    int width, height, mouseButton, newStatus;
+    int width, height, mouseButton, currentStatus;
     bool firstClick, solutionShown, gameRunning;
 	Nonogram *ngram;
-	void cleanUp();
+    QStack<pStatus> undoStack;
+    QStack<pStatus> redoStack;
 
  public:
-	MainWindow(QWidget *parent = 0);
+    MainWindow();
 	~MainWindow();
 
  private slots:
@@ -68,14 +77,24 @@ class MainWindow : public QMainWindow {
     void stopGame();
     void startGame();
     void startPuzzle();
+    void cleanUp();
+
     void HideSolution();
     void ShowSolution();
     void toggleSolution();
-    void paintPosition(int position, int status);
-    void clicked(int position);
+
+    void paintPosition(int position, int state);
+    void setStatus(int position, int state);
     void leftClicked(int position);
     void rightClicked(int position);
+
+    void addUndoStep(int position);
+    void addRedoStep(int position);
+    void undo();
+    void redo();
+
 	void checkSolution();
+
 	void quit();
 	void help();
 	void about();

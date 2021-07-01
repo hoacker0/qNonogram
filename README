@@ -8,7 +8,7 @@ DEPENDENCIES:
 qNonogram requires Qt5 to work.
 
 LICENSE:
-Nonogram-qt and all its components is distributed under the GNU GPL v3 (or later). Please see the file
+qNonogram and all its components is distributed under the GNU GPL v3 (or later). Please see the file
 "COPYING" for more details.
 
 INSTALLATION:
