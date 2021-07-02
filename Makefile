@@ -786,7 +786,9 @@ compiler_rcc_clean:
 	-$(DEL_FILE) qrc_qnonogram.cpp
 qrc_qnonogram.cpp: qnonogram.qrc \
 		/usr/lib64/qt5/bin/rcc \
-		icon.png
+		icon.png \
+		undo.png \
+		redo.png
 	/usr/lib64/qt5/bin/rcc -name qnonogram qnonogram.qrc -o qrc_qnonogram.cpp
 
 compiler_moc_predefs_make_all: moc_predefs.h

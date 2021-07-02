@@ -35,11 +35,15 @@ MainWindow::MainWindow() {
     connect(startstopButton, SIGNAL(clicked()), this, SLOT(startstop()));
     toggleSolutionButton = new QPushButton(tr("Show solution"), this);
     connect(toggleSolutionButton, SIGNAL(clicked()), this, SLOT(toggleSolution()));
-    undoButton = new QPushButton(tr("undo"), this);
-    connect(undoButton, SIGNAL(clicked()), this, SLOT(undo()));
-    redoButton = new QPushButton(tr("redo"), this);
-    connect(redoButton, SIGNAL(clicked()), this, SLOT(redo()));
     toggleSolutionButton->setEnabled(false);
+    undoButton = new QPushButton();
+    undoButton->setIcon(QIcon("undo.png"));
+    undoButton->setEnabled(false);
+    connect(undoButton, SIGNAL(clicked()), this, SLOT(undo()));
+    redoButton = new QPushButton();
+    redoButton->setIcon(QIcon("redo.png"));
+    redoButton->setEnabled(false);
+    connect(redoButton, SIGNAL(clicked()), this, SLOT(redo()));
 	ngram = NULL;
 
 	window->setLayout(layout);
@@ -48,10 +52,10 @@ MainWindow::MainWindow() {
 	top->addWidget(heightBox);
 	top->addWidget(widthLabel);
 	top->addWidget(widthBox);
-    top->addWidget(startstopButton);
-    top->addWidget(toggleSolutionButton);
     top->addWidget(undoButton);
     top->addWidget(redoButton);
+    top->addWidget(startstopButton);
+    top->addWidget(toggleSolutionButton);
 	layout->addSpacing(20);
 	layout->addLayout(top);
 	layout->addLayout(grid);
@@ -68,6 +72,27 @@ MainWindow::~MainWindow() {
 	style = NULL;
 	delete window;
 	window = NULL;
+}
+
+void MainWindow::keyPressEvent(QKeyEvent *event) {
+
+    if ( (event->modifiers() & Qt::ControlModifier)
+        && (event->modifiers() & Qt::ShiftModifier)
+        && (event->key() == Qt::Key_Z) ) {
+		// CTRL+SHIFT+Z
+		redo();
+		return;
+	}
+
+    if ( (event->modifiers() & Qt::ControlModifier)
+        && (event->key() == Qt::Key_Z) ) {
+        // CTRL+Z
+        undo();
+        return;
+    }
+
+	// No match, pass on event
+    QMainWindow::keyPressEvent(event);
 }
 
 void MainWindow::startstop() {
@@ -99,6 +124,9 @@ void MainWindow::stopGame() {
     toggleSolutionButton->setEnabled(false);
     solutionShown = true;
     toggleSolutionButton->setText("Hide solution");
+
+    undoButton->setEnabled(false);
+    redoButton->setEnabled(false);
 
     return;
 }
@@ -316,12 +344,14 @@ void MainWindow::paintPosition(int position, int state)  {
 
 void MainWindow::addUndoStep(int position) {
     undoStack.push(pStatus{position, status.at(position)});
+    undoButton->setEnabled(true);
     return;
 }
 
 
 void MainWindow::addRedoStep(int position) {
     redoStack.push(pStatus{position, status.at(position)});
+    redoButton->setEnabled(true);
     return;
 }
 
@@ -332,6 +362,9 @@ void MainWindow::undo() {
     pStatus pState = undoStack.pop();
     addRedoStep(pState.position);
     setStatus(pState.position, pState.status, false);
+
+    undoButton->setEnabled(!undoStack.isEmpty());
+
     return;
 }
 
@@ -342,11 +375,19 @@ void MainWindow::redo() {
     pStatus pState = redoStack.pop();
     addUndoStep(pState.position);
     setStatus(pState.position, pState.status, false);
+
+    redoButton->setEnabled(!redoStack.isEmpty());
+
     return;
 }
 
 void MainWindow::setStatus(int position, int state, bool addUndo) {
 
+    // Do do anything if status is already set
+    if (status.at(position) == state) return;
+
+    // only add undo if clicked()
+    // don not add undo if called from undo/redo
     if (addUndo) {
         addUndoStep(position);
         redoStack.clear();

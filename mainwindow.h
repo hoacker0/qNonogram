@@ -1,5 +1,6 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
+#include <Qt>
 #include <QMainWindow>
 #include <QWidget>
 #include <QMenu>
@@ -71,6 +72,7 @@ class MainWindow : public QMainWindow {
  public:
     MainWindow();
 	~MainWindow();
+	void keyPressEvent(QKeyEvent *event);
 
  private slots:
     void startstop();
