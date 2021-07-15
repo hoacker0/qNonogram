@@ -1,8 +1,8 @@
-#include "linesolver.h"
+#include "nonolinesolver.h"
 
-LineSolver::LineSolver() {}
+nonolinesolver::nonolinesolver() {}
 
-bool LineSolver::isDotCovered (size_t test) {
+bool nonolinesolver::isDotCovered (size_t test) {
 	return (test & partialDot);
 }
 
@@ -34,7 +34,7 @@ bool LineSolver::isDotCovered (size_t test) {
    ----------------------
    and:          00000100
 */
-bool LineSolver::isSolidAbutted (size_t test) {
+bool nonolinesolver::isSolidAbutted (size_t test) {
 	return ((((test << 1) | (test >> 1) | test) ^ test) & partialSolid);
 }
 
@@ -51,7 +51,7 @@ bool LineSolver::isSolidAbutted (size_t test) {
 	 --------------
 	 and:  01100000 (> 00111000 -> a solid has been revealed)
 */
-bool LineSolver::isSolidRevealed (size_t test) {
+bool nonolinesolver::isSolidRevealed (size_t test) {
 	return ((partialSolid & (test << 1)) > test);
 }
 
@@ -63,7 +63,7 @@ bool LineSolver::isSolidRevealed (size_t test) {
 	 --------------
 	 and:  01100010 (== solid -> ok)
  */
-bool LineSolver::isSolidMatch (size_t test) {
+bool nonolinesolver::isSolidMatch (size_t test) {
 	return ((partialSolid & test) == partialSolid);
 }
 
@@ -89,11 +89,11 @@ bool LineSolver::isSolidMatch (size_t test) {
 	 -------------------
 	 xor:       00111000
  */
-size_t LineSolver::bitRepresentationOfBlock (size_t block_size, size_t position) {
+size_t nonolinesolver::bitRepresentationOfBlock (size_t block_size, size_t position) {
 	return (((1 << (length - position)) - 1) ^ ((1 << (length - position - block_size)) - 1));
 }
 
-void LineSolver::printBitblock (size_t bitblock) {
+void nonolinesolver::printBitblock (size_t bitblock) {
 	size_t i = 1 << (length - 1);
 	do {
 		if (bitblock & i) {
@@ -107,7 +107,7 @@ void LineSolver::printBitblock (size_t bitblock) {
 	cout << endl;
 }
 
-void LineSolver::printResult () {
+void nonolinesolver::printResult () {
 	size_t i = 1 << (length - 1);
 	do {
 		if (improvedSolid & i) {
@@ -127,7 +127,7 @@ void LineSolver::printResult () {
 // Tries to squeeze out every bit of information that can be squeezed out with the
 // information already available. Will return "false" if additional information
 // can not be found, otherwise "true".
-bool LineSolver::solve (size_t block = 0, size_t position = 0, size_t parents = 0) {
+bool nonolinesolver::solve (size_t block = 0, size_t position = 0, size_t parents = 0) {
 	size_t temp = 0;
 	// Calculate where to stop (because pushing the block any further
 	// would mean that the remaining blocks wouldn't fit).
@@ -173,7 +173,7 @@ bool LineSolver::solve (size_t block = 0, size_t position = 0, size_t parents = 
 	return true;
 }
 
-void LineSolver::solve(size_t l, size_t ps, size_t pd, vector<size_t> *c) {
+void nonolinesolver::solve(size_t l, size_t ps, size_t pd, vector<size_t> *c) {
 	length = l;
 	partialSolid = ps;
 	partialDot = pd;
@@ -194,7 +194,7 @@ void LineSolver::solve(size_t l, size_t ps, size_t pd, vector<size_t> *c) {
 	}
 }
 
-size_t LineSolver::getSolid() {
+size_t nonolinesolver::getSolid() {
 	return improvedSolid;
 }
 
@@ -202,6 +202,6 @@ size_t LineSolver::getSolid() {
 	 This does not apply to the leading bits, though, so before it's returned we need to xor it
 	 against a number that is all 0's for the leading bits, and all 1's for the active bits.
  */
-size_t LineSolver::getDot() {
+size_t nonolinesolver::getDot() {
 	return (improvedDotMask ^ improvedDot);
 }

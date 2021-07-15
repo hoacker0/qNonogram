@@ -1,10 +1,10 @@
 #ifndef SOLVER_H
 #define SOLVER_H
-#include "linesolver.h"
+#include "nonolinesolver.h"
 
 #define STAT_SIZE 3
 
-class Solver {
+class nonosolver {
  private:
     size_t width, height;
 	vector<size_t> **xAxisClue;
@@ -38,8 +38,8 @@ class Solver {
 	void updateXStats(size_t row);
 
  public:
-	Solver(size_t w, size_t h, vector<size_t> **x, vector<size_t> **y);
-	~Solver();
+	nonosolver(size_t w, size_t h, vector<size_t> **x, vector<size_t> **y);
+	~nonosolver();
 	void printResult();
 	bool solve();
 };

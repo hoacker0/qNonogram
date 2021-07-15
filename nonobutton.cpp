@@ -1,10 +1,10 @@
-#include "pushbutton.h"
+#include "nonobutton.h"
 
 // button & first are pointers to the parent's variables. These are used to
 // convey information that the parent needs. "button" for which mouse button
 // was pressed, and "first" for whether this was the first operation in
 // a "click and drag" operation or not.
-PushButton::PushButton(int *b, bool *f, QWidget *parent) : button(b), first(f), QPushButton(parent) {
+nonobutton::nonobutton(int *b, bool *f, QWidget *parent) : button(b), first(f), QPushButton(parent) {
 	setAcceptDrops(true);
 	setStyleSheet("background-color: rgb(215, 215, 215)");
 	setMinimumSize(SIZE, SIZE);
@@ -12,7 +12,7 @@ PushButton::PushButton(int *b, bool *f, QWidget *parent) : button(b), first(f), 
 	processed = false;
 }
 
-void PushButton::mousePressEvent(QMouseEvent *e) {
+void nonobutton::mousePressEvent(QMouseEvent *e) {
 	if (e->button() != Qt::LeftButton && e->button() != Qt::RightButton) {
 		return;
 	}
@@ -34,7 +34,7 @@ void PushButton::mousePressEvent(QMouseEvent *e) {
 	emit released();
 }
 
-void PushButton::dragEnterEvent(QDragEnterEvent *e) {
+void nonobutton::dragEnterEvent(QDragEnterEvent *e) {
 	if (processed) {
 		processed = false;
 		return;
@@ -44,5 +44,5 @@ void PushButton::dragEnterEvent(QDragEnterEvent *e) {
 	}
 	else {
 		emit dot();
-	}
+    }
 }

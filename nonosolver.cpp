@@ -1,6 +1,6 @@
-#include "solver.h"
+#include "nonosolver.h"
 
-Solver::Solver(size_t w, size_t h, vector<size_t> **x, vector<size_t> **y) : width(w), height(h), xAxisClue(x), yAxisClue(y) {
+nonosolver::nonosolver(size_t w, size_t h, vector<size_t> **x, vector<size_t> **y) : width(w), height(h), xAxisClue(x), yAxisClue(y) {
 	for (size_t i = 0; i < width; ++i) {
 		size_t *temp = new size_t[STAT_SIZE];
 		for (size_t j = 0; j < STAT_SIZE; ++j) {
@@ -17,7 +17,7 @@ Solver::Solver(size_t w, size_t h, vector<size_t> **x, vector<size_t> **y) : wid
 	}
 }
 
-Solver::~Solver() {
+nonosolver::~nonosolver() {
 	for (size_t i = 0; i < width; ++i) {
 		delete[] xStats.at(i);
 	}
@@ -40,7 +40,7 @@ Solver::~Solver() {
 	 updated to the corresponding yStats position (defined by the mask variable). It
 	 starts at the most relevant bit and is right shifted one step for every iteration.
  */
-void Solver::updateYStats(size_t column) {
+void nonosolver::updateYStats(size_t column) {
 	size_t mask = 1 << (width - column - 1);
 	size_t row = 1 << (height - 1);
 	for (size_t i = 0; i < height; ++i) {
@@ -55,7 +55,7 @@ void Solver::updateYStats(size_t column) {
 }
 
 // Same as above function, but other way around.
-void Solver::updateXStats(size_t row) {
+void nonosolver::updateXStats(size_t row) {
 	size_t mask = 1 << (height - row - 1);
 	size_t column = 1 << (width - 1);
 	for (size_t i = 0; i < width; ++i) {
@@ -69,7 +69,7 @@ void Solver::updateXStats(size_t row) {
 	}
 }
 
-void Solver::printResult() {
+void nonosolver::printResult() {
 	for (size_t i = 0; i < height; ++i) {
 		for (size_t j = 1 << (width - 1); j > 0; j >>= 1) {
 			if ((yStats[i][1] & j) > 0) {
@@ -86,8 +86,8 @@ void Solver::printResult() {
 	}
 }
 
-bool Solver::solve() {
-	LineSolver lSolver;
+bool nonosolver::solve() {
+    nonolinesolver lSolver;
 	bool info_increased;
 	bool is_solved;
 	/* The mask is a variable of n 0's followed by m 1's. By 'or'ing the solids and the dots, and

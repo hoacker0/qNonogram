@@ -8,16 +8,16 @@
 
 #define SIZE 20
 
-class PushButton : public QPushButton {
+class nonobutton : public QPushButton {
     Q_OBJECT
 
- private:
-	int *button;
-    bool *first;
-    bool processed;
+public:
+    nonobutton(int *b, bool *f, QWidget *parent = 0);
 
- public:
-	PushButton(int *b, bool *f, QWidget *parent = 0);
+private:
+   int *button;
+   bool *first;
+   bool processed;
 
 protected:
 	void dragEnterEvent(QDragEnterEvent *e);

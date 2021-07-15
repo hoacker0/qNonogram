@@ -1,6 +1,6 @@
-#include "nonogram.h"
+#include "nonoengine.h"
 
-Nonogram::Nonogram(int w, int h) : width(w), height(h), solids(0), dots(0), field(new size_t[h]) {
+nonoengine::nonoengine(int w, int h) : width(w), height(h), solids(0), dots(0), field(new size_t[h]) {
 if ((xAxis = (vector<size_t>**)malloc(width * sizeof(vector<size_t>*))) == NULL ||
 		(yAxis = (vector<size_t>**)malloc(height * sizeof(vector<size_t>*))) == NULL) {
 	cerr << "ERROR: Malloc failed." << endl;
@@ -10,7 +10,7 @@ if ((xAxis = (vector<size_t>**)malloc(width * sizeof(vector<size_t>*))) == NULL 
 	generatePuzzle();
 }
 
-Nonogram::~Nonogram() {
+nonoengine::~nonoengine() {
 	delete[] field;
 	for (size_t i = 0; i < width; ++i) {
 		delete xAxis[i];
@@ -22,20 +22,20 @@ Nonogram::~Nonogram() {
 	free(yAxis);
 }
 
-vector<size_t>** Nonogram::getXAxis() {
+vector<size_t>** nonoengine::getXAxis() {
 	return xAxis;
 }
 
-vector<size_t>** Nonogram::getYAxis() {
+vector<size_t>** nonoengine::getYAxis() {
 	return yAxis;
 }
 
-size_t* Nonogram::getField() {
+size_t* nonoengine::getField() {
 	return field;
 }
 
 // Prints the puzzle. Mostly usable for debugging.
-void Nonogram::print() {
+void nonoengine::print() {
 	for (size_t i = 0; i < height; ++i) {
 		for (size_t j = (1 << (width - 1)); j > 0; j >>= 1) {
 			if (field[i] & j) {
@@ -50,7 +50,7 @@ void Nonogram::print() {
 }
 
 // Generates the puzzle (i.e. the numbers shown to the user) from the existing field.
-void Nonogram::generatePuzzle() {
+void nonoengine::generatePuzzle() {
 	size_t temp;
 	for (size_t i = 0; i < height; ++i) {
 		temp = 0;
@@ -93,7 +93,7 @@ void Nonogram::generatePuzzle() {
 }
 
 // Generate a semi-random playing field.
-void Nonogram::generateField() {
+void nonoengine::generateField() {
 	int random, above, left;
 	size_t mask = 1 << (width - 1);
 	double prob;
@@ -132,7 +132,7 @@ void Nonogram::generateField() {
 	 and we'd rather see that the black & white fields are (again roughly) collected
 	 in "islands" rather than a chessboard-type distribution.
 */
-double Nonogram::probability(int above, int left) {
+double nonoengine::probability(int above, int left) {
 	double p = 0.5;
 	switch (above + left) {
 	case -2:

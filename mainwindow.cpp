@@ -1,77 +1,97 @@
 #include "mainwindow.h"
+#include <QMessageBox>
+#include "dimensiondialog.h"
 
-MainWindow::MainWindow() {
-	window = new QWidget();
-	menu = new QMenuBar(window);
-	fileMenu = new QMenu(tr("&File"), window);
-	helpMenu = new QMenu(tr("&Help"), window);
-	menu->addMenu(fileMenu);
-	menu->addMenu(helpMenu);
-	exitAction = new QAction(tr("E&xit"), fileMenu);
-	connect(exitAction, SIGNAL(triggered()), this, SLOT(quit()));
-	helpAction = new QAction(tr("&Help"), helpMenu);
-	connect(helpAction, SIGNAL(triggered()), this, SLOT(help()));
-	aboutAction = new QAction(tr("&About"), helpMenu);
-	connect(aboutAction, SIGNAL(triggered()), this, SLOT(about()));
-	fileMenu->addAction(exitAction);
-	helpMenu->addAction(helpAction);
-	helpMenu->addAction(aboutAction);
-	layout = new QVBoxLayout(window);
-	top = new QHBoxLayout(window);
-	top->setAlignment(Qt::AlignLeft);
-	grid = new QGridLayout(window);
-	grid->setSpacing(0);
-    grid->setAlignment(Qt::AlignTop | Qt::AlignLeft);
-	style = new QCommonStyle();
-	widthBox = new QSpinBox(window);
-	heightBox = new QSpinBox(window);
-	widthBox->setRange(MIN_PUZZLE_SIZE, MAX_PUZZLE_SIZE);
-	heightBox->setRange(MIN_PUZZLE_SIZE, MAX_PUZZLE_SIZE);
-	widthBox->setValue(DEFAULT_PUZZLE_SIZE);
-	heightBox->setValue(DEFAULT_PUZZLE_SIZE);
-	widthLabel = new QLabel(tr("Columns:"), window);
-	heightLabel = new QLabel(tr("Rows:"), window);
-    startstopButton = new QPushButton(tr("New puzzle"), this);
-    connect(startstopButton, SIGNAL(clicked()), this, SLOT(startstop()));
-    toggleSolutionButton = new QPushButton(tr("Show solution"), this);
-    connect(toggleSolutionButton, SIGNAL(clicked()), this, SLOT(toggleSolution()));
-    toggleSolutionButton->setEnabled(false);
-    undoButton = new QPushButton();
-    undoButton->setIcon(QIcon("undo.png"));
-    undoButton->setEnabled(false);
-    connect(undoButton, SIGNAL(clicked()), this, SLOT(undo()));
-    redoButton = new QPushButton();
-    redoButton->setIcon(QIcon("redo.png"));
-    redoButton->setEnabled(false);
-    connect(redoButton, SIGNAL(clicked()), this, SLOT(redo()));
-	ngram = NULL;
+MainWindow::MainWindow(QWidget *parent)
+    : QMainWindow(parent)
+{
 
-	window->setLayout(layout);
-	setCentralWidget(window);
-	top->addWidget(heightLabel);
-	top->addWidget(heightBox);
-	top->addWidget(widthLabel);
-	top->addWidget(widthBox);
-    top->addWidget(undoButton);
-    top->addWidget(redoButton);
-    top->addWidget(startstopButton);
-    top->addWidget(toggleSolutionButton);
-	layout->addSpacing(20);
-	layout->addLayout(top);
-	layout->addLayout(grid);
+    // Create game object
+    game = new nonogame(this);
+    connect(game, SIGNAL(solved()), SLOT(solved()));
+    connect(game, SIGNAL(setUndo(bool)), SLOT(setUndo(bool)));
+    connect(game, SIGNAL(setRedo(bool)), SLOT(setRedo(bool)));
 
+    // Layout and Menues
+    QWidget *nonowidget = new QWidget;
+    setCentralWidget(nonowidget);
+
+    createMenu();
+    createLayout();
+
+    nonowidget->setLayout(mainLayout);
+
+    // set GUI to neutral state
+    restartAction->setEnabled(false);
     solutionShown = false;
-    gameRunning = false;
+
 }
 
-MainWindow::~MainWindow() {
-	if (ngram) {
-		cleanUp();
-	}
-	delete style;
-	style = NULL;
-	delete window;
-	window = NULL;
+MainWindow::~MainWindow()
+{
+}
+
+void MainWindow::createMenu()
+{
+
+    gameMenu = menuBar()->addMenu(tr("&Game"));
+
+    newAction = new QAction(tr("&New game"), this);
+    connect(newAction, &QAction::triggered, this, &MainWindow::newGame);
+    gameMenu->addAction(newAction);
+
+    restartAction = new QAction(tr("&Restart game"), this);
+    connect(restartAction, &QAction::triggered, this, &MainWindow::restartGame);
+    gameMenu->addAction(restartAction);
+
+    quitAction = new QAction(tr("&Quit"), this);
+    connect(quitAction, &QAction::triggered, this, &MainWindow::quit);
+    gameMenu->addAction(quitAction);
+
+    helpMenu = menuBar()->addMenu(tr("&Help"));
+
+    helpAction = new QAction(tr("&Help"), this);
+    connect(helpAction, &QAction::triggered, this, &MainWindow::help);
+    helpMenu->addAction(helpAction);
+
+    aboutAction = new QAction(tr("&About"), this);
+    connect(aboutAction, &QAction::triggered, this, &MainWindow::about);
+    helpMenu->addAction(aboutAction);
+
+}
+
+void MainWindow::createLayout()
+{
+
+    mainLayout = new QVBoxLayout;
+
+    // Top
+    undoButton = new QPushButton(this);
+    undoButton->setIcon(QIcon(":/undo.png"));
+    redoButton = new QPushButton(this);
+    redoButton->setIcon(QIcon(":/redo.png"));
+    undoButton->setEnabled(false);
+    redoButton->setEnabled(false);
+
+    toggleSolutionButton = new QPushButton(tr("Show solution"), this);
+    toggleSolutionButton->setEnabled(false);
+
+    top = new QHBoxLayout();
+    top->setAlignment(Qt::AlignLeft);
+    top->addWidget(undoButton);
+    connect(undoButton, &QPushButton::released, this, &MainWindow::undo);
+    top->addWidget(redoButton);
+    connect(redoButton, &QPushButton::released, this, &MainWindow::redo);
+    top->addWidget(redoButton);
+    connect(redoButton, &QPushButton::released, this, &MainWindow::redo);
+    top->addWidget(toggleSolutionButton);
+    connect(toggleSolutionButton, &QPushButton::released, this, &MainWindow::toggleSolution);
+
+    // Final assembly
+    //mainLayout->addSpacing(20);
+    mainLayout->addLayout(top);
+    mainLayout->addLayout(game->grid());
+
 }
 
 void MainWindow::keyPressEvent(QKeyEvent *event) {
@@ -79,10 +99,10 @@ void MainWindow::keyPressEvent(QKeyEvent *event) {
     if ( (event->modifiers() & Qt::ControlModifier)
         && (event->modifiers() & Qt::ShiftModifier)
         && (event->key() == Qt::Key_Z) ) {
-		// CTRL+SHIFT+Z
-		redo();
-		return;
-	}
+        // CTRL+SHIFT+Z
+        redo();
+        return;
+    }
 
     if ( (event->modifiers() & Qt::ControlModifier)
         && (event->key() == Qt::Key_Z) ) {
@@ -91,433 +111,109 @@ void MainWindow::keyPressEvent(QKeyEvent *event) {
         return;
     }
 
-	// No match, pass on event
+    // No match, pass on event
     QMainWindow::keyPressEvent(event);
 }
 
-void MainWindow::startstop() {
-    if (gameRunning) {
-        // game is running and shall be stopped/ended
-
-        // ask again
-        // ** TODO: ask popup "Sure?"**
-
-        // if confirmed
-        stopGame();
-    }
-    else {
-        // new game to be started
-        startGame();
-    }
-
+// SLOTs
+void MainWindow::solved()
+{
+    QMessageBox mb;
+    mb.setWindowTitle(tr("Well done"));
+    mb.setText(tr("You have solved the puzzle!"));
+    mb.exec();
 }
 
-void MainWindow::stopGame() {
-    gameRunning = false;
-
-    widthBox->setEnabled(true);
-    heightBox->setEnabled(true);
-    startstopButton->setText("New puzzle");
-
-    ShowSolution();
-
-    toggleSolutionButton->setEnabled(false);
-    solutionShown = true;
-    toggleSolutionButton->setText("Hide solution");
-
-    undoButton->setEnabled(false);
-    redoButton->setEnabled(false);
-
-    return;
+void MainWindow::setUndo(bool status)
+{
+    undoButton->setEnabled(status);
 }
 
-void MainWindow::startGame() {
-    gameRunning = true;
-
-    widthBox->setEnabled(false);
-    heightBox->setEnabled(false);
-    startstopButton->setText("Quit puzzle");
-
-    toggleSolutionButton->setEnabled(true);
-    solutionShown = false;
-    toggleSolutionButton->setText("Show solution");
-
-    undoStack.clear();
-    redoStack.clear();
-
-    startPuzzle();
-    return;
+void MainWindow::setRedo(bool status)
+{
+    redoButton->setEnabled(status);
 }
 
 
-// Generates, verifies and displays the puzzle and its graphical components.
-void MainWindow::startPuzzle() {
-	int pos, spacer_x, spacer_y;
-	// Start by disabling the buttons, so the user can't mess things up, as
-	// generating the puzzle can take some time. (Especially the big ones.)
-
-	// If this isn't the first puzzle generated, we need to clean out the garbage.
-	// ngram will be a NULL pointer the first time, but defined on subsequent calls.
-	if (ngram) {
-		cleanUp();
-	}
-	width = widthBox->value();
-	height = heightBox->value();
-	// We need to map the clicks and right clicks to the respective methods.
-	// Using mappers allows us to easily identify the button that sent the signal.
-	mapperLeftButton = new QSignalMapper(this);
-	mapperRightButton = new QSignalMapper(this);
-	ngram = new Nonogram(width, height);
-	xAxisClue = ngram->getXAxis();
-	yAxisClue = ngram->getYAxis();
-	Solver *solv = new Solver(width, height, xAxisClue, yAxisClue);
-	// Retry puzzle creation until we get a solvable one.
-	while (!solv->solve()) {
-		delete solv;
-		delete ngram;
-		ngram = new Nonogram(width, height);
-		xAxisClue = ngram->getXAxis();
-		yAxisClue = ngram->getYAxis();
-		solv = new Solver(width, height, xAxisClue, yAxisClue);
-	}
-	delete solv;
-	// Create and add the clue labels
-	spacer_x = 0;
-	spacer_y = 0;
-    for (int i = 0; i < width; ++i) {
-		QString str = "";
-		QString num = "";
-        for (size_t j = 0; j < xAxisClue[i]->size(); ++j) {
-			num.setNum(xAxisClue[i]->at(j), 10);
-			str.append(num);
-			if (j < xAxisClue[i]->size() - 1) {
-				str.append("\n");
-			}
-		}
-		xAxis.push_back(new QLabel(str));
-		xAxis.at(i)->setAlignment(Qt::AlignCenter | Qt::AlignBottom);
-		// We want to separate the UI buttons in 5 x 5 chunks, so that counting
-		// blocks becomes easier for the user.
-		if (i > 0 && i % 5 == 0) {
-			++spacer_x;
-			grid->setColumnMinimumWidth(i + spacer_x, 2);
-		}
-		grid->addWidget(xAxis.at(i), 0, i + spacer_x + 1);
-	}
-	for (int i = 0; i < height; ++i) {
-		QString str = "";
-		QString num = "";
-        for (size_t j = 0; j < yAxisClue[i]->size(); ++j) {
-			num.setNum(yAxisClue[i]->at(j), 10);
-			str.append(num);
-			str.append("  ");
-		}
-		yAxis.push_back(new QLabel(str));
-		yAxis.at(i)->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
-		if (i > 0 && i % 5 == 0) {
-			++spacer_y;
-			grid->setRowMinimumHeight(i + spacer_y, 2);
-		}
-		grid->addWidget(yAxis.at(i), i + spacer_y + 1, 0);
-	}
-	// Create the playing field itself.
-	spacer_y = 0;
-	for (int i = 0; i < height; ++i) {
-		if (i > 0 && i % 5 == 0) {
-			++spacer_y;
-		}
-		spacer_x = 0;
-		for (int j = 0; j < width; ++j) {
-			if (j > 0 && j % 5 == 0) {
-				++spacer_x;
-			}
-			pos = i * width + j;
-            status.push_back(STATUS_UNDECIDED);
-            puzzle.push_back(new PushButton(&mouseButton, &firstClick));
-			puzzle.at(pos)->setStyle(style);
-			connect(puzzle.at(pos), SIGNAL(solid()), mapperLeftButton, SLOT(map()));
-            connect(puzzle.at(pos), SIGNAL(dot()), mapperRightButton, SLOT(map()));
-			connect(puzzle.at(pos), SIGNAL(released()), this, SLOT(checkSolution()));
-			mapperLeftButton->setMapping(puzzle.at(pos), pos);
-			mapperRightButton->setMapping(puzzle.at(pos), pos);
-			grid->addWidget(puzzle.at(pos), i + spacer_y + 1, j + spacer_x + 1);
-		}
-	}
-    connect(mapperLeftButton, SIGNAL(mapped(int)), this, SLOT(leftClicked(int)));
-    connect(mapperRightButton, SIGNAL(mapped(int)), this, SLOT(rightClicked(int)));
+void MainWindow::undo()
+{
+    game->undo();
 }
 
-// Cleans up stuff before a new game is started
-void MainWindow::cleanUp() {
-	delete ngram;
-	ngram = NULL;
-    for (size_t i = 0; i < xAxis.size(); ++i) {
-		delete xAxis.at(i);
-	}
-	xAxis.clear();
-    for (size_t i = 0; i < yAxis.size(); ++i) {
-		delete yAxis.at(i);
-	}
-	yAxis.clear();
-	for (int i = 0; i < width * height; ++i) {
-		delete puzzle.at(i);
-	}
-	puzzle.clear();
-	delete mapperLeftButton;
-	delete mapperRightButton;
-	status.clear();
-    solutionShown = false;
+void MainWindow::redo()
+{
+    game->redo();
 }
 
 // Toggle Solution shown/hidden
 void MainWindow::toggleSolution() {
 
     if (solutionShown) {
-        HideSolution();
-        toggleSolutionButton->setText("Show solution");
+        game->hideSolution();
+        toggleSolutionButton->setText(tr("Show solution"));
     } else {
-        ShowSolution();
-        toggleSolutionButton->setText("Hide solution");
+        game->showSolution();
+        toggleSolutionButton->setText(tr("Hide solution"));
     }
     solutionShown = !solutionShown;
     return;
 }
 
-// Hide the solution (see ShowSolution) again and show only user marks
-void MainWindow::HideSolution() {
-    int position;
-    for (int i = 0; i < height; ++i) {
-        for (int j = 0; j < width; ++j) {
-            position = i * width + j;
-            paintPosition(position, status.at(position));
+void MainWindow::newGame()
+{
+
+    // if game running, ask before starting new
+    if (game->running()) {
+        QMessageBox msgBox;
+        msgBox.setText(tr("A game is running. Quit game and start new?"));
+        msgBox.setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
+        msgBox.setDefaultButton(
+        QMessageBox::Cancel);
+        int ret = msgBox.exec();
+
+        if (ret == QMessageBox::Cancel)
+        {
+            return;
         }
     }
+
+    // Ask user for game size
+    dimensionDialog dimDialog(this);
+    dimDialog.exec();
+
+    // new game
+    game->newGame(dimDialog.pWidth(), dimDialog.pHeight());
+    restartAction->setEnabled(true);
+    toggleSolutionButton->setEnabled(true);
+
 }
 
+void MainWindow::restartGame()
+{
+    // ask before clearing
+    QMessageBox msgBox;
+    msgBox.setText(tr("Restart game?"));
+    msgBox.setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
+    msgBox.setDefaultButton(QMessageBox::Cancel);
+    int ret = msgBox.exec();
 
-// Display all solids that the user has missed, in grey and all
-// blanks he has mistakenly identified as solids in red.
-void MainWindow::ShowSolution() {
-	int pos;
-	for (int i = 0; i < height; ++i) {
-		size_t mask = 1 << width;
-		for (int j = 0; j < width; ++j) {
-			mask >>= 1;
-			pos = i * width + j;
-            if (status.at(pos) == STATUS_SOLID) {
-				if (!(ngram->getField()[i] & mask)) {
-                    paintPosition(pos, STATUS_HINT_BLANK);
-				}
-			}
-			else if (ngram->getField()[i] & mask) {
-                paintPosition(pos, STATUS_HINT_SOLID);
-			}
-		}
-	}
-}
-
-void MainWindow::paintPosition(int position, int state)  {
-
-    switch (state) {
-    case STATUS_UNDECIDED:
-        puzzle.at(position)->setText("");
-        puzzle.at(position)->setStyleSheet("background-color: rgb(215, 215, 215)");
-        break;
-    case STATUS_SOLID:
-        puzzle.at(position)->setText("");
-        puzzle.at(position)->setStyleSheet("background-color: rgb(50, 50, 150)");
-        break;
-    case STATUS_BLANK:
-        puzzle.at(position)->setText("X");
-        puzzle.at(position)->setStyleSheet("background-color: rgb(215, 215, 215)");
-        break;
-    case STATUS_HINT_BLANK:
-        puzzle.at(position)->setStyleSheet("background-color: rgb(255, 0, 0)");
-        break;
-    case STATUS_HINT_SOLID:
-        puzzle.at(position)->setStyleSheet("background-color: rgb(150, 150, 215)");
-        break;
+    if (ret == QMessageBox::Ok)
+    {
+        // restart
+        game->restart();
     }
-
-    return;
-}
-
-void MainWindow::addUndoStep(int position) {
-    undoStack.push(pStatus{position, status.at(position)});
-    undoButton->setEnabled(true);
-    return;
-}
-
-
-void MainWindow::addRedoStep(int position) {
-    redoStack.push(pStatus{position, status.at(position)});
-    redoButton->setEnabled(true);
-    return;
-}
-
-void MainWindow::undo() {
-
-    if (undoStack.isEmpty()) return;
-
-    pStatus pState = undoStack.pop();
-    addRedoStep(pState.position);
-    setStatus(pState.position, pState.status, false);
-
-    undoButton->setEnabled(!undoStack.isEmpty());
-
-    return;
-}
-
-void MainWindow::redo() {
-
-    if (redoStack.isEmpty()) return;
-
-    pStatus pState = redoStack.pop();
-    addUndoStep(pState.position);
-    setStatus(pState.position, pState.status, false);
-
-    redoButton->setEnabled(!redoStack.isEmpty());
-
-    return;
-}
-
-void MainWindow::setStatus(int position, int state, bool addUndo) {
-
-    // Do do anything if status is already set
-    if (status.at(position) == state) return;
-
-    // only add undo if clicked()
-    // don not add undo if called from undo/redo
-    if (addUndo) {
-        addUndoStep(position);
-        redoStack.clear();
-    }
-
-    status.at(position) = state;
-    paintPosition(position, state);
-    return;
-}
-
-// Called when left button is clicked or dragged over with button depressed.
-void MainWindow::leftClicked(int position) {
-
-    // If no game currently running, do nothing
-    if (!gameRunning) return;
-
-    if (firstClick) {
-        // single click or first click in draw action
-        // determine new status and keep it until new "firstClick"
-        if (status.at(position) == STATUS_SOLID) {
-            currentStatus = STATUS_UNDECIDED;
-        }
-        else {
-            currentStatus = STATUS_SOLID;
-        }
-        firstClick = false;
-    }
-
-    // set new status at position
-    setStatus(position, currentStatus, true);
-    return;
-}
-
-// Called when right button is clicked or dragged over with button depressed.
-void MainWindow::rightClicked(int position) {
-
-    // If no game currently running, do nothing
-    if (!gameRunning) return;
-
-    if (firstClick) {
-        // single click or first click in draw action
-        // determine new status and keep it until new "firstClick"
-        if (status.at(position) == STATUS_BLANK) {
-            currentStatus = STATUS_UNDECIDED;
-        }
-        else {
-            currentStatus = STATUS_BLANK;
-        }
-        firstClick = false;
-    }
-
-    // set new status at position
-    setStatus(position, currentStatus, true);
-    return;
-
-}
-
-// Check whether the puzzle is solved or not. Display a message if it is.
-void MainWindow::checkSolution() {
-	// Since this function is called when the mouse button is released,
-	// we use it to unset the lockAction variable.
-	for (int i = 0; i < height; ++i) {
-		size_t test = 0;
-		size_t mask = 1 << width;
-		for (int j = 0; j < width; ++j) {
-			mask >>= 1;
-            if (status.at(i * width + j) == STATUS_SOLID) {
-				test |= mask;
-			}
-		}
-		if (test != ngram->getField()[i]) {
-			return;
-		}
-	}
-	for (int i = 0; i < width * height; ++i) {
-		puzzle.at(i)->setEnabled(false);
-	}
-	QMessageBox mb;
-	mb.setWindowTitle(tr("Well done"));
-	mb.setText(tr("You have solved the puzzle!"));
-	mb.exec();
-    stopGame();
-}
-
-void MainWindow::about() {
-	QMessageBox mb;
-	mb.setWindowTitle(tr("About"));
-        mb.setText(tr("<p><h3>qNonogram 0.1</h3></p><p>Copyright: Holger Ackermann, 2021. Based on nonogram-qt Copyright: Daniel Suni, 2012, 2013, 2018</p><p>Distributed under the GNU GPL v3</p>"));
-	mb.exec();
-}
-
-void MainWindow::help() {
-	QWidget *helpWindow = new QWidget();
-	helpWindow->setWindowTitle(tr("Help"));
-	QHBoxLayout *bl = new QHBoxLayout(helpWindow);
-	QLabel *text = new QLabel(tr("<h2>What are nonograms?</h2>\
-<p>Nonograms are logic puzzles consisting of a rectangular grid divided into cells. These cells can be either<br>\
-colored (solids) or blank (X). At the start of the game all cells are blank, and the purpose of the game is<br>\
-to figure out which ones should be colored.</p>\
-<p>Each row and column in the grid is fitted with a clue consisting of a series of numbers. These numbers reveal<br>\
-how many solids there are on the row/column as well as something about their grouping. If e.g. the clue is<br>\
-(3 1 2) we know that from left to right there is first a series of 3 consequtive solids, then X number of blanks,<br>\
-where X >= 1, then a single solid, then another unspecified number of blanks, and finally 2 consequtive solids.<br>\
-If the row was 10 cells long, one possible arrangement would be (-###-#--##), another one would be (###-#-##--).<br>\
-Since there are rules for both rows and columns, only one arrangement is actually correct, though. The puzzle is<br>\
-to find the arrangement that conforms to all the given clues.</p>\
-<h2>How to play</h2>\
-<p>In order to start a new game, please select the size of the desired playing field, and click the &quot;Generate puzzle&quot;<br>\
-button. Generating the puzzle can take a few seconds - especially if it's a big one, so please be patient.</p>\
-<p>When starting all cells are blank. You can mark a cell as a solid by clicking on it. You can also mark larger areas<br>\
-by dragging the mouse with the button pressed. If you've made a mistake, just click the cell again to revert it to a<br>\
-blank. You can also mark known blanks by right clicking (and dragging). This will be shown by an 'X' appearing in that<br>\
-cell. Notice that you don't need to explicitly mark the blanks in order to solve the puzzle. That functionality only<br>\
-exists for your own convenience.</p>\
-<p>Every time you make a move the computer will automatically check whether you've successfully solved the puzzle<br>\
- or not. Once the puzzle is solved, you will immediately be informed. If the puzzle turns out to be too hard, you can<br>\
-end it, and look at the solution by pressing the &quot;Give up&quot; button. Remaining solids will be displayed in<br>\
-grey, and possible mistakes (i.e. blanks marked as solids) will be displayed in red.</p>"), helpWindow);
-	helpWindow->setLayout(bl);
-	bl->addWidget(text);
-	helpWindow->show();
 }
 
 void MainWindow::quit() {
-	if (ngram) {
-        cleanUp();
-	}
-	delete style;
-	style = NULL;
-	delete window;
-	window = NULL;
-	exit(0);
+    exit(0);
+}
+
+void MainWindow::help()
+{
+    bool todo;
+}
+
+void MainWindow::about()
+{
+    bool todo;
 }

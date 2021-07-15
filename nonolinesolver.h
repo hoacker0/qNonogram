@@ -5,7 +5,7 @@
 
 using namespace std;
 
-class LineSolver {
+class nonolinesolver {
 private:
 	size_t length;
 	vector<size_t> *clue;
@@ -22,7 +22,7 @@ private:
 	bool solve (size_t block, size_t position, size_t parents);
 	
 public:
-	LineSolver();
+	nonolinesolver();
 	void printBitblock (size_t bitblock);
 	void printResult();
 	void solve(size_t l, size_t ps, size_t pd, vector<size_t> *c);

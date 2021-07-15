@@ -2,9 +2,9 @@
 #define NONOGRAM_H
 #include <ctime> 
 #include <cstdlib>
-#include "solver.h"
+#include "nonosolver.h"
 
-class Nonogram {
+class nonoengine {
  private:
 	size_t width, height;
 	int solids, dots;
@@ -16,8 +16,8 @@ class Nonogram {
 	double probability(int above, int left);
 
  public:
-	Nonogram(int w, int h);
-	~Nonogram();
+	nonoengine(int w, int h);
+	~nonoengine();
 	void print();
 	vector<size_t>** getXAxis();
 	vector<size_t>** getYAxis();
