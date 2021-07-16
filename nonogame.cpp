@@ -222,6 +222,7 @@ void nonogame::checkSolution() {
     for (int i = 0; i < width * height; ++i) {
         puzzle.at(i)->setEnabled(false);
     }
+    isRunning = false;
     emit solved();
 }
 
