@@ -2,5 +2,6 @@
     <qresource prefix="/">
         <file>redo.png</file>
         <file>undo.png</file>
+        <file>qnonogram.ico</file>
     </qresource>
 </RCC>
