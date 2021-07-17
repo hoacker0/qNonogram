@@ -4,9 +4,9 @@
 // convey information that the parent needs. "button" for which mouse button
 // was pressed, and "first" for whether this was the first operation in
 // a "click and drag" operation or not.
-nonobutton::nonobutton(int *b, bool *f, QWidget *parent) : button(b), first(f), QPushButton(parent) {
+nonobutton::nonobutton(QWidget *parent, int *b, bool *f) : QPushButton(parent), button(b), first(f) {
 	setAcceptDrops(true);
-	setStyleSheet("background-color: rgb(215, 215, 215)");
+    setStyleSheet("background-color: rgb(255, 255, 255)");
 	setMinimumSize(SIZE, SIZE);
 	setMaximumSize(SIZE, SIZE);
 	processed = false;

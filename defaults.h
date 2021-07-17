@@ -1,0 +1,9 @@
+#ifndef DEFAULTS_H
+#define DEFAULTS_H
+
+#define MIN_PUZZLE_SIZE 3
+#define MAX_PUZZLE_SIZE 30
+#define DEFAULT_PUZZLE_SIZE 20
+
+
+#endif // DEFAULTS_H

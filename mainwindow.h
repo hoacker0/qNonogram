@@ -27,6 +27,7 @@ private:
     QMenu *helpMenu;
     QAction *newAction;
     QAction *restartAction;
+    QAction *settingsAction;
     QAction *quitAction;
     QAction *helpAction;
     QAction *aboutAction;
@@ -39,10 +40,14 @@ private:
 
     nonogame *game;
     int gameWidth, gameHeight;
+    int defaultWidth, defaultHeight;
     bool solutionShown;
 
     void createMenu();
     void createLayout();
+    void loadSettings();
+    void saveSettings();
+
 
 private slots:
     void solved();
@@ -53,6 +58,7 @@ private slots:
     void toggleSolution();
     void newGame();
     void restartGame();
+    void settings();
     void quit();
     void help();
     void about();

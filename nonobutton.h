@@ -12,7 +12,7 @@ class nonobutton : public QPushButton {
     Q_OBJECT
 
 public:
-    nonobutton(int *b, bool *f, QWidget *parent = 0);
+    nonobutton(QWidget *parent, int *b, bool *f);
 
 private:
    int *button;

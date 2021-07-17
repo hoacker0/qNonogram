@@ -1,5 +1,5 @@
-#ifndef DIMENSIONDIALOG_H
-#define DIMENSIONDIALOG_H
+#ifndef SETTINGSDIALOG_H
+#define SETTINGSDIALOG_H
 
 #include <QDialog>
 #include <QLabel>
@@ -7,20 +7,20 @@
 #include <QHBoxLayout>
 #include <QDialogButtonBox>
 
-class dimensionDialog : public QDialog        
+class settingsDialog : public QDialog
 {
     Q_OBJECT
 
 public:
-    //dimensionDialog(QWidget *parent);
-    dimensionDialog(QWidget *parent, int *w, int *h);
-    int *width, *height;
-    int pWidth();
-    int pHeight();
+    settingsDialog(QWidget *parent, int w, int h);
+    int width, height;
+    int sWidth();
+    int sHeight();
 
 private:
     QHBoxLayout *sizeBoxLayout;
     QVBoxLayout *dialogLayout;
+    QLabel *sizeLabel;
     QLabel *heightLabel;
     QSpinBox *widthBox;
     QLabel *widthLabel;
@@ -28,4 +28,4 @@ private:
     QDialogButtonBox *buttonBox;
 };
 
-#endif // DIMENSIONDIALOG_H
+#endif // SETTINGSDIALOG_H

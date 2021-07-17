@@ -142,7 +142,7 @@ void nonogame::startPuzzle() {
             }
             pos = i * width + j;
             status.push_back(STATUS_UNDECIDED);
-            puzzle.push_back(new nonobutton(&mouseButton, &firstClick));
+            puzzle.push_back(new nonobutton(NULL, &mouseButton, &firstClick));
             puzzle.at(pos)->setStyle(style);
             QObject::connect(puzzle.at(pos), SIGNAL(solid()), mapperLeftButton, SLOT(map()));
             QObject::connect(puzzle.at(pos), SIGNAL(dot()), mapperRightButton, SLOT(map()));
@@ -285,6 +285,10 @@ void nonogame::addRedoStep(int position) {
 
 void nonogame::undo() {
 
+    // If no game currently running, do nothing
+    if (!isRunning) return;
+
+    // If nothing to undo, do nothing
     if (undoStack.isEmpty()) return;
 
     pStatus pState = undoStack.pop();
@@ -298,6 +302,10 @@ void nonogame::undo() {
 
 void nonogame::redo() {
 
+    // If no game currently running, do nothing
+    if (!isRunning) return;
+
+    // If nothing to redo, do nothing
     if (redoStack.isEmpty()) return;
 
     pStatus pState = redoStack.pop();
@@ -314,7 +322,7 @@ void nonogame::paintPosition(int position, int state)  {
     switch (state) {
     case STATUS_UNDECIDED:
         puzzle.at(position)->setText("");
-        puzzle.at(position)->setStyleSheet("background-color: rgb(215, 215, 215)");
+        puzzle.at(position)->setStyleSheet("background-color: rgb(255, 255, 255)");
         break;
     case STATUS_SOLID:
         puzzle.at(position)->setText("");

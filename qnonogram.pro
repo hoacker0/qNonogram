@@ -23,16 +23,19 @@ SOURCES += \
     nonoengine.cpp \
     nonogame.cpp \
     nonolinesolver.cpp \
-    nonosolver.cpp
+    nonosolver.cpp \
+    settingsdialog.cpp
 
 HEADERS += \
+    defaults.h \
     dimensiondialog.h \
     mainwindow.h \
     nonobutton.h \
     nonoengine.h \
     nonogame.h \
     nonolinesolver.h \
-    nonosolver.h
+    nonosolver.h \
+    settingsdialog.h
 
 TRANSLATIONS += \
     qnonogram_en_GB.ts
