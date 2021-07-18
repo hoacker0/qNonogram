@@ -169,6 +169,8 @@ void MainWindow::keyPressEvent(QKeyEvent *event) {
 // SLOTs
 void MainWindow::solved()
 {
+    toggleSolutionButton->setEnabled(false);
+
     QMessageBox mb;
     mb.setWindowTitle(tr("Well done"));
     mb.setText(tr("You have solved the puzzle!"));
@@ -237,6 +239,7 @@ void MainWindow::newGame()
     game->newGame(gameWidth, gameHeight);
     restartAction->setEnabled(true);
     toggleSolutionButton->setEnabled(true);
+    toggleSolutionButton->setText(tr("Show solution"));
 
 }
 
@@ -292,7 +295,7 @@ void MainWindow::quit() {
 void MainWindow::about() {
     QMessageBox mb;
     mb.setWindowTitle(tr("About"));
-    mb.setText(tr("<p><h3>qNonogram 0.1</h3></p><p>Copyright: Holger Ackermann, 2021.<br>\
+    mb.setText(tr("<p><h3>qnonogram</h3></p><p>Copyright: Holger Ackermann, 2021.<br>\
  Based on nonogram-qt by Daniel Suni.</p>\
 <p>Distributed under the GNU GPL v3</p>"));
     mb.exec();
