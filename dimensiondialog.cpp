@@ -1,5 +1,5 @@
 #include "dimensiondialog.h"
-#include "defaults.h"
+#include "defines.h"
 
 dimensionDialog::dimensionDialog(QWidget *parent, int *w, int *h) : QDialog(parent), width(w), height(h)
 {

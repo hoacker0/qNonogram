@@ -1,4 +1,5 @@
 #include "nonogame.h"
+#include <QPalette>
 
 nonogame::nonogame(QObject* gameParent)
 {
@@ -26,6 +27,14 @@ nonogame::~nonogame()
 QGridLayout* nonogame::grid()
 {
     return gameGrid;
+}
+
+void nonogame::setPaintValues(qnono::paintValues paintVals)
+{
+    paintValues = paintVals;
+    if (isRunning) {
+        repaintGrid();
+    }
 }
 
 void nonogame::newGame(int gameWidth, int gameHeight)
@@ -144,6 +153,7 @@ void nonogame::startPuzzle() {
             status.push_back(STATUS_UNDECIDED);
             puzzle.push_back(new nonobutton(NULL, &mouseButton, &firstClick));
             puzzle.at(pos)->setStyle(style);
+            puzzle.at(pos)->paint(paintValues.undecided);
             QObject::connect(puzzle.at(pos), SIGNAL(solid()), mapperLeftButton, SLOT(map()));
             QObject::connect(puzzle.at(pos), SIGNAL(dot()), mapperRightButton, SLOT(map()));
             QObject::connect(puzzle.at(pos), SIGNAL(released()), this, SLOT(checkSolution()));
@@ -226,8 +236,7 @@ void nonogame::checkSolution() {
     emit solved();
 }
 
-// Hide the solution (see ShowSolution) again and show only user marks
-void nonogame::hideSolution() {
+void nonogame::repaintGrid() {
     int position;
     for (int i = 0; i < height; ++i) {
         for (int j = 0; j < width; ++j) {
@@ -235,6 +244,12 @@ void nonogame::hideSolution() {
             paintPosition(position, status.at(position));
         }
     }
+}
+
+
+// Hide the solution (see ShowSolution) again and show only user marks
+void nonogame::hideSolution() {
+    repaintGrid();
 }
 
 
@@ -321,22 +336,19 @@ void nonogame::paintPosition(int position, int state)  {
 
     switch (state) {
     case STATUS_UNDECIDED:
-        puzzle.at(position)->setText("");
-        puzzle.at(position)->setStyleSheet("background-color: rgb(255, 255, 255)");
+        puzzle.at(position)->paint(paintValues.undecided, " ");
         break;
     case STATUS_SOLID:
-        puzzle.at(position)->setText("");
-        puzzle.at(position)->setStyleSheet("background-color: rgb(50, 50, 150)");
+        puzzle.at(position)->paint(paintValues.solid, " ");
         break;
     case STATUS_BLANK:
-        puzzle.at(position)->setText("X");
-        puzzle.at(position)->setStyleSheet("background-color: rgb(215, 215, 215)");
+        puzzle.at(position)->paint(paintValues.blank, "X");
         break;
     case STATUS_HINT_BLANK:
-        puzzle.at(position)->setStyleSheet("background-color: rgb(255, 0, 0)");
+        puzzle.at(position)->paint(paintValues.hint_blank);
         break;
     case STATUS_HINT_SOLID:
-        puzzle.at(position)->setStyleSheet("background-color: rgb(150, 150, 215)");
+        puzzle.at(position)->paint(paintValues.hint_solid);
         break;
     }
 

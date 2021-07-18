@@ -6,9 +6,16 @@
 #include <QMouseEvent>
 #include <QMimeData>
 
-#define SIZE 20
+class nonobutton_base : public QPushButton {
+    Q_OBJECT
 
-class nonobutton : public QPushButton {
+public:
+    nonobutton_base(QWidget *parent);
+    void paint(QColor color, QString marker = NULL);
+
+};
+
+class nonobutton : public nonobutton_base {
     Q_OBJECT
 
 public:

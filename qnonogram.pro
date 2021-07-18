@@ -27,7 +27,7 @@ SOURCES += \
     settingsdialog.cpp
 
 HEADERS += \
-    defaults.h \
+    defines.h \
     dimensiondialog.h \
     mainwindow.h \
     nonobutton.h \

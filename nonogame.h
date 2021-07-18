@@ -12,12 +12,7 @@
 
 #include "nonobutton.h"
 #include "nonoengine.h"
-
-#define STATUS_UNDECIDED 2
-#define STATUS_BLANK 1
-#define STATUS_SOLID 0
-#define STATUS_HINT_BLANK 11
-#define STATUS_HINT_SOLID 10
+#include "defines.h"
 
 struct pStatus {
     int position;
@@ -35,9 +30,11 @@ public:
 
     QGridLayout* grid();
     void newGame(int gameWidth, int gameHeight);
+    void setPaintValues(qnono::paintValues paintVals);
     bool running() {return isRunning;}
     void startPuzzle();
     void cleanUp();
+    void repaintGrid();
     void hideSolution();
     void showSolution();
     void restart();
@@ -50,6 +47,8 @@ private:
     QCommonStyle *style;
     QSignalMapper *mapperLeftButton;
     QSignalMapper *mapperRightButton;
+
+    qnono::paintValues paintValues;
 
     nonoengine *gameEngine;
     nonosolver *gameSolver;

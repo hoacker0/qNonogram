@@ -3,17 +3,20 @@
 #include <QSettings>
 #include "dimensiondialog.h"
 #include "settingsdialog.h"
-#include "defaults.h"
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
 {
+
+    loadSettings();
 
     // Create game object
     game = new nonogame(this);
     connect(game, SIGNAL(solved()), SLOT(solved()));
     connect(game, SIGNAL(setUndo(bool)), SLOT(setUndo(bool)));
     connect(game, SIGNAL(setRedo(bool)), SLOT(setRedo(bool)));
+
+    game->setPaintValues(paintValues);
 
     // Layout and Menues
     QWidget *nonowidget = new QWidget;
@@ -28,8 +31,6 @@ MainWindow::MainWindow(QWidget *parent)
     restartAction->setEnabled(false);
     solutionShown = false;
 
-    loadSettings();
-
 }
 
 MainWindow::~MainWindow()
@@ -39,8 +40,10 @@ MainWindow::~MainWindow()
 void MainWindow::loadSettings()
 {
     QSettings settings;
-    defaultWidth = settings.value("width").toInt();
-    defaultHeight = settings.value("height").toInt();
+
+    // Load width and height
+    defaultWidth = settings.value("width", DEFAULT_PUZZLE_SIZE).toInt();
+    defaultHeight = settings.value("height", DEFAULT_PUZZLE_SIZE).toInt();
 
     if ((defaultWidth < MIN_PUZZLE_SIZE) || (defaultWidth > MAX_PUZZLE_SIZE))
     {
@@ -54,6 +57,13 @@ void MainWindow::loadSettings()
 
     gameWidth = defaultWidth;
     gameHeight = defaultHeight;
+
+    // Load colors and markers
+    paintValues.solid = settings.value("color solid", QColor(DEFAULT_COLOR_SOLID)).value<QColor>();
+    paintValues.blank = settings.value("color blank", QColor(DEFAULT_COLOR_BLANK)).value<QColor>();
+    paintValues.undecided = settings.value("color undecided", QColor(DEFAULT_COLOR_UNDECIDED)).value<QColor>();
+    paintValues.hint_solid = settings.value("color hint solid", QColor(DEFAULT_COLOR_HINT_SOLID)).value<QColor>();
+    paintValues.hint_blank = settings.value("color hint blank", QColor(DEFAULT_COLOR_HINT_BLANK)).value<QColor>();
 }
 
 void MainWindow::saveSettings()
@@ -61,6 +71,11 @@ void MainWindow::saveSettings()
     QSettings settings;
     settings.setValue("width", defaultWidth);
     settings.setValue("height", defaultHeight);
+    settings.setValue("color solid", paintValues.solid);
+    settings.setValue("color blank", paintValues.blank);
+    settings.setValue("color undecided", paintValues.undecided);
+    settings.setValue("color hint solid", paintValues.hint_solid);
+    settings.setValue("color hint blank", paintValues.hint_blank);
 
 }
 void MainWindow::createMenu()
@@ -242,14 +257,16 @@ void MainWindow::restartGame()
 }
 
 void MainWindow::settings() {
-    settingsDialog setDialog(this, defaultWidth, defaultHeight);
+    settingsDialog setDialog(this, defaultWidth, defaultHeight, paintValues);
     int ret = setDialog.exec();
 
     if (ret == QDialog::Accepted)
     {
         defaultWidth = setDialog.sWidth();
         defaultHeight = setDialog.sHeight();
+        paintValues = setDialog.sPaintValues();
         saveSettings();
+        game->setPaintValues(paintValues);
     }
 
 }

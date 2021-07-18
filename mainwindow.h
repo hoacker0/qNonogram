@@ -41,6 +41,9 @@ private:
     nonogame *game;
     int gameWidth, gameHeight;
     int defaultWidth, defaultHeight;
+
+    qnono::paintValues paintValues;
+
     bool solutionShown;
 
     void createMenu();
