@@ -1,5 +1,5 @@
 [Desktop Entry]
-	Name=qnonogram
-	Exec=gnonogram
-	Icon=qnonogram.ico
-	Type=Application
+Name=qnonogram
+Exec=qnonogram
+Icon=qnonogram.ico
+Type=Application
