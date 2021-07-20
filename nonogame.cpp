@@ -153,6 +153,7 @@ void nonogame::startPuzzle() {
             status.push_back(STATUS_UNDECIDED);
             puzzle.push_back(new nonobutton(NULL, &mouseButton, &firstClick));
             puzzle.at(pos)->setStyle(style);
+            puzzle.at(pos)->setSize(paintValues.field_size);
             puzzle.at(pos)->paint(paintValues.undecided);
             QObject::connect(puzzle.at(pos), SIGNAL(solid()), mapperLeftButton, SLOT(map()));
             QObject::connect(puzzle.at(pos), SIGNAL(dot()), mapperRightButton, SLOT(map()));
@@ -242,6 +243,7 @@ void nonogame::repaintGrid() {
         for (int j = 0; j < width; ++j) {
             position = i * width + j;
             paintPosition(position, status.at(position));
+            puzzle.at(position)->setSize(paintValues.field_size);
         }
     }
 }

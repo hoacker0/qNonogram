@@ -12,6 +12,7 @@ class nonobutton_base : public QPushButton {
 public:
     nonobutton_base(QWidget *parent);
     void paint(QColor color, QString marker = NULL);
+    void setSize(int size);
 
 };
 

@@ -64,6 +64,8 @@ void MainWindow::loadSettings()
     paintValues.undecided = settings.value("color undecided", QColor(DEFAULT_COLOR_UNDECIDED)).value<QColor>();
     paintValues.hint_solid = settings.value("color hint solid", QColor(DEFAULT_COLOR_HINT_SOLID)).value<QColor>();
     paintValues.hint_blank = settings.value("color hint blank", QColor(DEFAULT_COLOR_HINT_BLANK)).value<QColor>();
+
+    paintValues.field_size = settings.value("field size", DEFAULT_FIELD_SIZE).toInt();
 }
 
 void MainWindow::saveSettings()
@@ -76,6 +78,7 @@ void MainWindow::saveSettings()
     settings.setValue("color undecided", paintValues.undecided);
     settings.setValue("color hint solid", paintValues.hint_solid);
     settings.setValue("color hint blank", paintValues.hint_blank);
+    settings.setValue("field size", paintValues.field_size);
 
 }
 void MainWindow::createMenu()

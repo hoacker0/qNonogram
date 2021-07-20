@@ -29,9 +29,8 @@ public:
 private:
     QHBoxLayout *sizeBoxLayout;
     QVBoxLayout *dialogLayout;
-    QGridLayout *colorGrid;
+    QGridLayout *optionsGrid;
 
-    QLabel *sizeLabel;
     QLabel *heightLabel;
     QSpinBox *widthBox;
     QLabel *widthLabel;
@@ -49,11 +48,15 @@ private:
     QLabel *colorHintBlankLabel;
     nonobutton_base *colorHintBlankButton;
 
+    QLabel *fieldSizeLabel;
+    QSpinBox *fieldSizeBox;
+
     QPushButton *resetButton;
 
     QDialogButtonBox *buttonBox;
 
     void paintColorButtons();
+    void sizeColorButtons(int size);
     QColor getColor(QColor pColor);
 
 private slots:
@@ -62,6 +65,7 @@ private slots:
     void setUndecided();
     void setHintSolid();
     void setHintBlank();
+    void setFieldSize();
     void reset();
 };
 

@@ -13,8 +13,7 @@ settingsDialog::settingsDialog(QWidget *parent, int w, int h, qnono::paintValues
     heightBox->setRange(MIN_PUZZLE_SIZE, MAX_PUZZLE_SIZE);
     widthBox->setValue(width);
     heightBox->setValue(height);
-    sizeLabel = new QLabel(tr("Default Puzzle Size: "), this);
-    heightLabel = new QLabel(tr("Rows"), this);
+    heightLabel = new QLabel(tr("Default Rows"), this);
     widthLabel = new QLabel(tr("Columns"), this);
 
     QHBoxLayout *sizeBoxLayout = new QHBoxLayout;
@@ -22,6 +21,13 @@ settingsDialog::settingsDialog(QWidget *parent, int w, int h, qnono::paintValues
     sizeBoxLayout->addWidget(heightBox);
     sizeBoxLayout->addWidget(widthLabel);
     sizeBoxLayout->addWidget(widthBox);
+
+    // Field size
+    fieldSizeBox = new QSpinBox(this);
+    fieldSizeBox->setRange(15, 40);
+    fieldSizeBox->setValue(paintValues.field_size);
+    fieldSizeLabel = new QLabel(tr("Puzzle field size: "), this);
+    connect(fieldSizeBox, QOverload<int>::of(&QSpinBox::valueChanged), this, &settingsDialog::setFieldSize);
 
     // Colors and DOT-Markers
     style = new QCommonStyle();
@@ -51,19 +57,23 @@ settingsDialog::settingsDialog(QWidget *parent, int w, int h, qnono::paintValues
     colorHintBlankButton->setStyle(style);
     QPushButton::connect(colorHintBlankButton, &QPushButton::released, this, &settingsDialog::setHintBlank);
 
+    sizeColorButtons(pVals.field_size);
     paintColorButtons();
 
-    QGridLayout *colorGrid = new QGridLayout;
-    colorGrid->addWidget(colorSolidLabel,0,0,1,1);
-    colorGrid->addWidget(colorSolidButton,0,1,1,1);
-    colorGrid->addWidget(colorBlankLabel,1,0,1,1);
-    colorGrid->addWidget(colorBlankButton,1,1,1,1);
-    colorGrid->addWidget(colorUndecidedLabel,2,0,1,1);
-    colorGrid->addWidget(colorUndecidedButton,2,1,1,1);
-    colorGrid->addWidget(colorHintSolidLabel,3,0,1,1);
-    colorGrid->addWidget(colorHintSolidButton,3,1,1,1);
-    colorGrid->addWidget(colorHintBlankLabel,4,0,1,1);
-    colorGrid->addWidget(colorHintBlankButton,4,1,1,1);
+    int row = 0;
+    QGridLayout *optionsGrid = new QGridLayout;
+    optionsGrid->addWidget(fieldSizeLabel,row,0,1,1);
+    optionsGrid->addWidget(fieldSizeBox,row++,1,1,1);
+    optionsGrid->addWidget(colorSolidLabel,row,0,1,1);
+    optionsGrid->addWidget(colorSolidButton,row++,1,1,1);
+    optionsGrid->addWidget(colorBlankLabel,row,0,1,1);
+    optionsGrid->addWidget(colorBlankButton,row++,1,1,1);
+    optionsGrid->addWidget(colorUndecidedLabel,row,0,1,1);
+    optionsGrid->addWidget(colorUndecidedButton,row++,1,1,1);
+    optionsGrid->addWidget(colorHintSolidLabel,row,0,1,1);
+    optionsGrid->addWidget(colorHintSolidButton,row++,1,1,1);
+    optionsGrid->addWidget(colorHintBlankLabel,row,0,1,1);
+    optionsGrid->addWidget(colorHintBlankButton,row++,1,1,1);
 
     // Reset button
     resetButton = new QPushButton(tr("Reset to defaults"),this);
@@ -76,9 +86,8 @@ settingsDialog::settingsDialog(QWidget *parent, int w, int h, qnono::paintValues
 
     // Assemble layout
     QVBoxLayout *dialogLayout = new QVBoxLayout;
-    dialogLayout->addWidget(sizeLabel);
     dialogLayout->addLayout(sizeBoxLayout);
-    dialogLayout->addLayout(colorGrid);
+    dialogLayout->addLayout(optionsGrid);
     dialogLayout->addWidget(resetButton);
     dialogLayout->addWidget(buttonBox);
 
@@ -90,6 +99,16 @@ settingsDialog::settingsDialog(QWidget *parent, int w, int h, qnono::paintValues
 settingsDialog::~settingsDialog()
 {
     delete style;
+}
+
+void settingsDialog::sizeColorButtons(int size)
+{
+    colorSolidButton->setSize(size);
+    colorBlankButton->setSize(size);
+    colorUndecidedButton->setSize(size);
+    colorHintSolidButton->setSize(size);
+    colorHintBlankButton->setSize(size);
+
 }
 
 void settingsDialog::paintColorButtons()
@@ -142,6 +161,12 @@ void settingsDialog::setHintBlank()
     colorHintSolidButton->paint(paintValues.hint_blank);
 }
 
+void settingsDialog::setFieldSize()
+{
+    paintValues.field_size = fieldSizeBox->value();
+    sizeColorButtons(paintValues.field_size);
+}
+
 void settingsDialog::reset()
 {
     widthBox->setValue(DEFAULT_PUZZLE_SIZE);
@@ -152,6 +177,8 @@ void settingsDialog::reset()
     paintValues.undecided = DEFAULT_COLOR_UNDECIDED;
     paintValues.hint_solid = DEFAULT_COLOR_HINT_SOLID;
     paintValues.hint_blank = DEFAULT_COLOR_HINT_BLANK;
+
+    fieldSizeBox->setValue(DEFAULT_FIELD_SIZE);
 
     paintColorButtons();
 }

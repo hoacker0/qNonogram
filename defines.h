@@ -11,7 +11,7 @@ namespace qnono {
 
     // default button sizes
     #define DEFAULT_PUZZLE_SIZE 20
-    #define DEFAULT_BUTTON_SIZE 20
+    #define DEFAULT_FIELD_SIZE 20
 
     // default colors
     #define DEFAULT_COLOR_SOLID "#323296"
@@ -27,6 +27,7 @@ namespace qnono {
         QColor undecided;
         QColor hint_solid;
         QColor hint_blank;
+        int field_size;
     };
 
     // status
