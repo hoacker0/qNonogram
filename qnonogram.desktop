@@ -1,0 +1,5 @@
+[Desktop Entry]
+	Name=qnonogram
+	Exec=gnonogram
+	Icon=qnonogram.ico
+	Type=Application
