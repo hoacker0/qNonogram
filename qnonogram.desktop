@@ -1,5 +1,6 @@
 [Desktop Entry]
 Name=qnonogram
 Exec=qnonogram
-Icon=qnonogram.ico
+Icon=qnonogram.png
 Type=Application
+Categories=Game;LogicGame;
