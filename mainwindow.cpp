@@ -1,4 +1,5 @@
 #include "mainwindow.h"
+#include <QApplication>
 #include <QMessageBox>
 #include <QSettings>
 #include "dimensiondialog.h"
@@ -237,9 +238,11 @@ void MainWindow::newGame()
     dimDialog.exec();
 
     // new game
+    QApplication::setOverrideCursor(Qt::WaitCursor);
     gameWidth = dimDialog.pWidth();
     gameHeight =dimDialog.pHeight();
     game->newGame(gameWidth, gameHeight);
+    QApplication::restoreOverrideCursor();
     restartAction->setEnabled(true);
     toggleSolutionButton->setEnabled(true);
     toggleSolutionButton->setText(tr("Show solution"));
