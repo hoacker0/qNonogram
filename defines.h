@@ -5,13 +5,18 @@
 
 namespace qnono {
 
-    // Puzzle sizes
+    // min max sizes
     #define MIN_PUZZLE_SIZE 3
     #define MAX_PUZZLE_SIZE 30
 
-    // default button sizes
+    // default sizes
     #define DEFAULT_PUZZLE_SIZE 20
     #define DEFAULT_FIELD_SIZE 20
+    #define STATE_SELECT_FACTOR 1.3
+
+    // click modes
+    #define CLICK_MODE_LEFT_RIGHT 0
+    #define CLICK_MODE_LEFT_ONLY 1
 
     // default colors
     #define DEFAULT_COLOR_SOLID "#323296"

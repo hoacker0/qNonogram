@@ -7,8 +7,9 @@
 #include <QLabel>
 #include <QSpinBox>
 #include <QPushButton>
-
+#include "nonobutton.h"
 #include "nonogame.h"
+
 
 class MainWindow : public QMainWindow
 {
@@ -38,14 +39,20 @@ private:
     QPushButton *redoButton;
     QPushButton *toggleSolutionButton;
 
+    nonobutton_base *paintSolid;
+    nonobutton_base *paintEmpty;
+    nonobutton_base *paintUndecided;
+
     nonogame *game;
     int gameWidth, gameHeight;
     int defaultWidth, defaultHeight;
+    int clickMode;
 
     qnono::paintValues paintValues;
 
     bool solutionShown;
 
+    void showStateSelectors(bool show);
     void createMenu();
     void createLayout();
     void loadSettings();
@@ -65,6 +72,9 @@ private slots:
     void quit();
     void help();
     void about();
+    void setClickSolid();
+    void setClickEmpty();
+    void setClickUndecided();
 
 };
 #endif // MAINWINDOW_H

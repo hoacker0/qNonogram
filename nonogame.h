@@ -40,6 +40,8 @@ public:
     void restart();
     void undo();
     void redo();
+    void setClickMode(int cm) {clickMode = cm;};
+    void setClickStatus(int cs) {currentStatus = cs;};
 
 private:
     QObject* parent;
@@ -66,6 +68,7 @@ private:
     bool firstClick, solutionShown, isRunning;
     int width, height;
     int mouseButton, currentStatus;
+    int clickMode;
 
     vector<QLabel*> xAxis, yAxis;
     vector<size_t> **xAxisClue;

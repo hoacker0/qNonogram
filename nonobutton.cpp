@@ -3,7 +3,15 @@
 
 nonobutton_base::nonobutton_base(QWidget *parent) : QPushButton(parent)
 {
+    style = new QCommonStyle();
+    this->setStyle(style);
+    setMinimumSize(DEFAULT_FIELD_SIZE, DEFAULT_FIELD_SIZE);
+    setMaximumSize(DEFAULT_FIELD_SIZE, DEFAULT_FIELD_SIZE);
 
+}
+nonobutton_base::~nonobutton_base()
+{
+    delete style;
 }
 
 void nonobutton_base::setSize(int size)
@@ -30,8 +38,6 @@ nonobutton::nonobutton(QWidget *parent, int *b, bool *f) : nonobutton_base(paren
 {
 	setAcceptDrops(true);
     setStyleSheet("background-color: rgb(255, 255, 255)");
-    setMinimumSize(DEFAULT_FIELD_SIZE, DEFAULT_FIELD_SIZE);
-    setMaximumSize(DEFAULT_FIELD_SIZE, DEFAULT_FIELD_SIZE);
     processed = false;
 }
 

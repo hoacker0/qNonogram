@@ -3,11 +3,11 @@
 
 #include <QDialog>
 #include <QLabel>
-#include <QCommonStyle>
 #include <QSpinBox>
 #include <QHBoxLayout>
 #include <QPushButton>
 #include <QDialogButtonBox>
+#include <QComboBox>
 #include <QColor>
 #include "nonobutton.h"
 #include "defines.h"
@@ -17,17 +17,20 @@ class settingsDialog : public QDialog
     Q_OBJECT
 
 public:
-    settingsDialog(QWidget *parent, int w, int h, qnono::paintValues pVals);
+    settingsDialog(QWidget *parent, int w, int h, qnono::paintValues pVals, int cm);
     ~settingsDialog();
     int width, height;
     int sWidth();
     int sHeight();
     qnono::paintValues paintValues;
     qnono::paintValues sPaintValues();
+    void setClickMode(int mode);
+    int getClickMode();
 
 
 private:
     QHBoxLayout *sizeBoxLayout;
+    QHBoxLayout *clickModeLayout;
     QVBoxLayout *dialogLayout;
     QGridLayout *optionsGrid;
 
@@ -36,7 +39,6 @@ private:
     QLabel *widthLabel;
     QSpinBox *heightBox;
 
-    QCommonStyle *style;
     QLabel *colorSolidLabel;
     nonobutton_base *colorSolidButton;
     QLabel *colorBlankLabel;
@@ -50,6 +52,9 @@ private:
 
     QLabel *fieldSizeLabel;
     QSpinBox *fieldSizeBox;
+
+    QLabel *clickModeLabel;
+    QComboBox *clickModeCombo;
 
     QPushButton *resetButton;
 
@@ -65,7 +70,7 @@ private slots:
     void setUndecided();
     void setHintSolid();
     void setHintBlank();
-    void setFieldSize();
+    void setFieldSize();;
     void reset();
 };
 

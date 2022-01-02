@@ -2,7 +2,7 @@
 #include "defines.h"
 #include <QColorDialog>
 
-settingsDialog::settingsDialog(QWidget *parent, int w, int h, qnono::paintValues pVals)
+settingsDialog::settingsDialog(QWidget *parent, int w, int h, qnono::paintValues pVals, int cm)
     : QDialog(parent), width(w), height(h), paintValues(pVals)
 {
 
@@ -22,6 +22,17 @@ settingsDialog::settingsDialog(QWidget *parent, int w, int h, qnono::paintValues
     sizeBoxLayout->addWidget(widthLabel);
     sizeBoxLayout->addWidget(widthBox);
 
+    // Click mode
+    clickModeLabel = new QLabel(tr("Click mode"), this);
+    clickModeCombo = new QComboBox(this);
+    clickModeCombo->addItem(tr("left and right click"));
+    clickModeCombo->addItem(tr("left click or tap"));
+    clickModeCombo->setCurrentIndex(cm);
+
+    QHBoxLayout *clickModeLayout = new QHBoxLayout;
+    clickModeLayout->addWidget(clickModeLabel);
+    clickModeLayout->addWidget(clickModeCombo);
+
     // Field size
     fieldSizeBox = new QSpinBox(this);
     fieldSizeBox->setRange(15, 40);
@@ -30,31 +41,24 @@ settingsDialog::settingsDialog(QWidget *parent, int w, int h, qnono::paintValues
     connect(fieldSizeBox, QOverload<int>::of(&QSpinBox::valueChanged), this, &settingsDialog::setFieldSize);
 
     // Colors and DOT-Markers
-    style = new QCommonStyle();
-
     colorSolidLabel = new QLabel(tr("\"Solid\" color"), this);
     colorSolidButton = new nonobutton_base(this);
-    colorSolidButton->setStyle(style);
     QPushButton::connect(colorSolidButton, &QPushButton::released, this, &settingsDialog::setSolid);
 
     colorBlankLabel = new QLabel(tr("\"Blank\" mark color"), this);
     colorBlankButton = new nonobutton_base(this);
-    colorBlankButton->setStyle(style);
     QPushButton::connect(colorBlankButton, &QPushButton::released, this, &settingsDialog::setBlank);
 
     colorUndecidedLabel = new QLabel(tr("Undecided field color"), this);
     colorUndecidedButton = new nonobutton_base(this);
-    colorUndecidedButton->setStyle(style);
     QPushButton::connect(colorUndecidedButton, &QPushButton::released, this, &settingsDialog::setUndecided);
 
     colorHintSolidLabel = new QLabel(tr("Hint \"Solid\" color"), this);
     colorHintSolidButton = new nonobutton_base(this);
-    colorHintSolidButton->setStyle(style);
     QPushButton::connect(colorHintSolidButton, &QPushButton::released, this, &settingsDialog::setHintSolid);
 
     colorHintBlankLabel = new QLabel(tr("Hint \"Blank\" color"), this);
     colorHintBlankButton = new nonobutton_base(this);
-    colorHintBlankButton->setStyle(style);
     QPushButton::connect(colorHintBlankButton, &QPushButton::released, this, &settingsDialog::setHintBlank);
 
     sizeColorButtons(pVals.field_size);
@@ -88,6 +92,7 @@ settingsDialog::settingsDialog(QWidget *parent, int w, int h, qnono::paintValues
     QVBoxLayout *dialogLayout = new QVBoxLayout;
     dialogLayout->addLayout(sizeBoxLayout);
     dialogLayout->addLayout(optionsGrid);
+    dialogLayout->addLayout(clickModeLayout);
     dialogLayout->addWidget(resetButton);
     dialogLayout->addWidget(buttonBox);
 
@@ -98,7 +103,6 @@ settingsDialog::settingsDialog(QWidget *parent, int w, int h, qnono::paintValues
 
 settingsDialog::~settingsDialog()
 {
-    delete style;
 }
 
 void settingsDialog::sizeColorButtons(int size)
@@ -166,6 +170,17 @@ void settingsDialog::setFieldSize()
     paintValues.field_size = fieldSizeBox->value();
     sizeColorButtons(paintValues.field_size);
 }
+
+void settingsDialog::setClickMode(int cm)
+{
+    clickModeCombo->setCurrentIndex(cm);
+}
+
+int settingsDialog::getClickMode()
+{
+    return clickModeCombo->currentIndex();
+}
+
 
 void settingsDialog::reset()
 {

@@ -18,6 +18,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(game, SIGNAL(setRedo(bool)), SLOT(setRedo(bool)));
 
     game->setPaintValues(paintValues);
+    game->setClickMode(clickMode);
 
     // Layout and Menues
     QWidget *nonowidget = new QWidget;
@@ -58,6 +59,7 @@ void MainWindow::loadSettings()
 
     gameWidth = defaultWidth;
     gameHeight = defaultHeight;
+    clickMode = settings.value("clickMode", CLICK_MODE_LEFT_RIGHT).toInt();
 
     // Load colors and markers
     paintValues.solid = settings.value("color solid", QColor(DEFAULT_COLOR_SOLID)).value<QColor>();
@@ -74,6 +76,7 @@ void MainWindow::saveSettings()
     QSettings settings;
     settings.setValue("width", defaultWidth);
     settings.setValue("height", defaultHeight);
+    settings.setValue("clickMode", clickMode);
     settings.setValue("color solid", paintValues.solid);
     settings.setValue("color blank", paintValues.blank);
     settings.setValue("color undecided", paintValues.undecided);
@@ -115,6 +118,19 @@ void MainWindow::createMenu()
 
 }
 
+void MainWindow::showStateSelectors(bool show)
+{
+    if (show) {
+        paintSolid->show();
+        paintEmpty->show();
+        paintUndecided->show();
+    } else {
+        paintSolid->hide();
+        paintEmpty->hide();
+        paintUndecided->hide();
+    }
+}
+
 void MainWindow::createLayout()
 {
 
@@ -141,6 +157,33 @@ void MainWindow::createLayout()
     connect(redoButton, &QPushButton::released, this, &MainWindow::redo);
     top->addWidget(toggleSolutionButton);
     connect(toggleSolutionButton, &QPushButton::released, this, &MainWindow::toggleSolution);
+
+    paintSolid = new nonobutton_base(this);
+    paintSolid->paint(paintValues.solid);
+    paintSolid->setSize(STATE_SELECT_FACTOR * DEFAULT_FIELD_SIZE);
+    QPushButton::connect(paintSolid, &QPushButton::released, this, &MainWindow::setClickSolid);
+
+    paintEmpty = new nonobutton_base(this);
+    paintEmpty->paint(paintValues.blank, "X");
+    paintEmpty->setSize(STATE_SELECT_FACTOR * DEFAULT_FIELD_SIZE);
+    QPushButton::connect(paintEmpty, &QPushButton::released, this, &MainWindow::setClickEmpty);
+
+    paintUndecided = new nonobutton_base(this);
+    paintUndecided->paint(paintValues.undecided);
+    paintUndecided->setSize(STATE_SELECT_FACTOR * DEFAULT_FIELD_SIZE);
+    QPushButton::connect(paintUndecided, &QPushButton::released, this, &MainWindow::setClickUndecided);
+
+    top->addSpacerItem(new QSpacerItem(30, 0, QSizePolicy::Fixed, QSizePolicy::Ignored));
+    top->addWidget(paintSolid);
+    top->addSpacerItem(new QSpacerItem(10, 0, QSizePolicy::Fixed, QSizePolicy::Ignored));
+    top->addWidget(paintEmpty);
+    top->addSpacerItem(new QSpacerItem(10, 0, QSizePolicy::Fixed, QSizePolicy::Ignored));
+    top->addWidget(paintUndecided);
+
+    if (clickMode == CLICK_MODE_LEFT_RIGHT) {
+            // LEFT/RIGHT mode does not require state selector buttons
+            showStateSelectors(false);
+    }
 
     // Final assembly
     //mainLayout->addSpacing(20);
@@ -200,6 +243,18 @@ void MainWindow::undo()
 void MainWindow::redo()
 {
     game->redo();
+}
+
+void MainWindow::setClickSolid() {
+    game->setClickStatus(STATUS_SOLID);
+}
+
+void MainWindow::setClickEmpty() {
+    game->setClickStatus(STATUS_BLANK);
+}
+
+void MainWindow::setClickUndecided() {
+    game->setClickStatus(STATUS_UNDECIDED);
 }
 
 // Toggle Solution shown/hidden
@@ -266,16 +321,19 @@ void MainWindow::restartGame()
 }
 
 void MainWindow::settings() {
-    settingsDialog setDialog(this, defaultWidth, defaultHeight, paintValues);
+    settingsDialog setDialog(this, defaultWidth, defaultHeight, paintValues, clickMode);
     int ret = setDialog.exec();
 
     if (ret == QDialog::Accepted)
     {
         defaultWidth = setDialog.sWidth();
         defaultHeight = setDialog.sHeight();
+        clickMode = setDialog.getClickMode();
         paintValues = setDialog.sPaintValues();
         saveSettings();
         game->setPaintValues(paintValues);
+        game->setClickMode(clickMode);
+        showStateSelectors(clickMode != 0);
     }
 
 }

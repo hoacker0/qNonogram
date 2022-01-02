@@ -5,14 +5,19 @@
 #include <QDragEnterEvent>
 #include <QMouseEvent>
 #include <QMimeData>
+#include <QCommonStyle>
 
 class nonobutton_base : public QPushButton {
     Q_OBJECT
 
 public:
     nonobutton_base(QWidget *parent);
+    ~nonobutton_base();
     void paint(QColor color, QString marker = NULL);
     void setSize(int size);
+
+private:
+    QCommonStyle *style;
 
 };
 

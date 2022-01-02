@@ -173,17 +173,20 @@ void nonogame::leftClicked(int position) {
     // If no game currently running, do nothing
     if (!isRunning) return;
 
-    if (firstClick) {
-        // single click or first click in draw action
-        // determine new status and keep it until new "firstClick"
-        if (status.at(position) == STATUS_SOLID) {
-            currentStatus = STATUS_UNDECIDED;
+    if (clickMode == CLICK_MODE_LEFT_RIGHT ) { // left and right mouse button
+        if (firstClick) {
+            // single click or first click in draw action
+            // determine new status and keep it until new "firstClick"
+            if (status.at(position) == STATUS_SOLID) {
+                currentStatus = STATUS_UNDECIDED;
+            }
+            else {
+                currentStatus = STATUS_SOLID;
+            }
+            firstClick = false;
         }
-        else {
-            currentStatus = STATUS_SOLID;
-        }
-        firstClick = false;
     }
+    // else: use explicitly set currentStatus. Nothing to do here.
 
     // set new status at position
     setStatus(position, currentStatus, true);
@@ -196,20 +199,24 @@ void nonogame::rightClicked(int position) {
     // If no game currently running, do nothing
     if (!isRunning) return;
 
-    if (firstClick) {
-        // single click or first click in draw action
-        // determine new status and keep it until new "firstClick"
-        if (status.at(position) == STATUS_BLANK) {
-            currentStatus = STATUS_UNDECIDED;
+    if  (clickMode == CLICK_MODE_LEFT_RIGHT) { // left and right mouse button
+        if (firstClick) {
+            // single click or first click in draw action
+            // determine new status and keep it until new "firstClick"
+            if (status.at(position) == STATUS_BLANK) {
+                currentStatus = STATUS_UNDECIDED;
+            }
+            else {
+                currentStatus = STATUS_BLANK;
+            }
+            firstClick = false;
         }
-        else {
-            currentStatus = STATUS_BLANK;
-        }
-        firstClick = false;
-    }
 
-    // set new status at position
-    setStatus(position, currentStatus, true);
+        // set new status at position
+        setStatus(position, currentStatus, true);
+    }
+    // else: only use left mouse button with explicitly set currentStatus. Nothing to do here.
+
     return;
 }
 
