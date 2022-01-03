@@ -1,6 +1,8 @@
 [Desktop Entry]
 Name=qnonogram
-Exec=qnonogram
-Icon=qnonogram
 Type=Application
-Categories=Game;LogicGame;
+Comment=Nonogram or japanese puzzle based on Qt5
+Exec=qnonogram
+TryExec=qnonogram
+Icon=qnonogram
+Categories=Qt;Game;LogicGame;
