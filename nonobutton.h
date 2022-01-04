@@ -35,9 +35,11 @@ private:
 protected:
 	void dragEnterEvent(QDragEnterEvent *e);
 	void mousePressEvent(QMouseEvent *e);
+    void mouseMoveEvent(QMouseEvent *e);
 	
  signals:
 	void solid();
 	void dot();
+    void mousemove();
 };
 #endif

@@ -49,6 +49,7 @@ private:
     QCommonStyle *style;
     QSignalMapper *mapperLeftButton;
     QSignalMapper *mapperRightButton;
+    QSignalMapper *mapperMouseMove;
 
     qnono::paintValues paintValues;
 
@@ -59,7 +60,7 @@ private:
     QStack<pStatus> redoStack;
 
     void setStatus(int position, int state, bool addUndo);
-    void paintPosition(int position, int state);
+    void paintPosition(int position, int state, int mark);
     void clearGrid();
 
     void addUndoStep(int position);
@@ -69,6 +70,9 @@ private:
     int width, height;
     int mouseButton, currentStatus;
     int clickMode;
+    int lastMousePos;
+    void markPosition(QPoint pos, int mark);
+    QPoint posKoords(int pos);
 
     vector<QLabel*> xAxis, yAxis;
     vector<size_t> **xAxisClue;
@@ -79,6 +83,7 @@ private:
 private slots:
     void leftClicked(int position);
     void rightClicked(int position);
+    void mouseMoved(int position);
     void checkSolution();
 
 signals:

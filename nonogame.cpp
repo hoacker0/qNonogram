@@ -76,6 +76,7 @@ void nonogame::startPuzzle() {
     int pos, spacer_x, spacer_y;
 
     clearGrid();
+    lastMousePos = -1;
 
     gameEngine = new nonoengine(width, height);
     xAxisClue = gameEngine->getXAxis();
@@ -133,10 +134,11 @@ void nonogame::startPuzzle() {
         gameGrid->addWidget(yAxis.at(i), i + spacer_y + 1, 0);
     }
 
-    // We need to map the clicks and right clicks to the respective methods.
+    // We need to map mouse events to the respective methods.
     // Using mappers allows us to easily identify the button that sent the signal.
     mapperLeftButton = new QSignalMapper(this);
     mapperRightButton = new QSignalMapper(this);
+    mapperMouseMove = new QSignalMapper(this);
 
     // Create the playing field itself.
     spacer_y = 0;
@@ -157,14 +159,17 @@ void nonogame::startPuzzle() {
             puzzle.at(pos)->paint(paintValues.undecided);
             QObject::connect(puzzle.at(pos), SIGNAL(solid()), mapperLeftButton, SLOT(map()));
             QObject::connect(puzzle.at(pos), SIGNAL(dot()), mapperRightButton, SLOT(map()));
+            QObject::connect(puzzle.at(pos), SIGNAL(mousemove()), mapperMouseMove, SLOT(map()));
             QObject::connect(puzzle.at(pos), SIGNAL(released()), this, SLOT(checkSolution()));
             mapperLeftButton->setMapping(puzzle.at(pos), pos);
             mapperRightButton->setMapping(puzzle.at(pos), pos);
+            mapperMouseMove->setMapping(puzzle.at(pos), pos);
             gameGrid->addWidget(puzzle.at(pos), i + spacer_y + 1, j + spacer_x + 1);
         }
     }
     QObject::connect(mapperLeftButton, SIGNAL(mapped(int)), this, SLOT(leftClicked(int)));
     QObject::connect(mapperRightButton, SIGNAL(mapped(int)), this, SLOT(rightClicked(int)));
+    QObject::connect(mapperMouseMove, SIGNAL(mapped(int)), this, SLOT(mouseMoved(int)));
 }
 
 // Called when left button is clicked or dragged over with button depressed.
@@ -220,6 +225,52 @@ void nonogame::rightClicked(int position) {
     return;
 }
 
+QPoint nonogame::posKoords(int pos) {
+
+    // first row, first col = position 0
+    // count row and col from zero
+
+    //int col = pos % width;
+    //int row = (pos - col + 1) / width;
+    //return QPoint(col, row);
+
+    return QPoint(pos % width, (pos - (pos % width) + 1) / width);
+
+}
+
+void nonogame::markPosition(QPoint pos, int mark) {
+
+    // mark column
+    for (int i = 0; i< height; i++) {
+        int position =  pos.x() + i*width;
+        paintPosition(position, status.at(position), mark);
+    }
+    // mark row
+    for (int i = 0; i< width; i++) {
+        int position =  pos.y()*width +i;
+        paintPosition(position, status.at(position), mark);
+    }
+}
+
+// Called when mouse is moved
+void nonogame::mouseMoved(int position) {
+    if (lastMousePos != position) {
+
+        // unmark old position
+        if (lastMousePos > 0) {
+            markPosition(posKoords(lastMousePos), 0);
+        }
+
+        // mark current position
+        markPosition(posKoords(position), 1);
+
+        // remember current mouse position
+        lastMousePos = position;
+    }
+
+    return;
+}
+
 // Check whether the puzzle is solved or not. Display a message if it is.
 void nonogame::checkSolution() {
     // Since this function is called when the mouse button is released,
@@ -249,7 +300,7 @@ void nonogame::repaintGrid() {
     for (int i = 0; i < height; ++i) {
         for (int j = 0; j < width; ++j) {
             position = i * width + j;
-            paintPosition(position, status.at(position));
+            paintPosition(position, status.at(position),0);
             puzzle.at(position)->setSize(paintValues.field_size);
         }
     }
@@ -273,11 +324,11 @@ void nonogame::showSolution() {
             pos = i * width + j;
             if (status.at(pos) == STATUS_SOLID) {
                 if (!(gameEngine->getField()[i] & mask)) {
-                    paintPosition(pos, STATUS_HINT_BLANK);
+                    paintPosition(pos, STATUS_HINT_BLANK, 0);
                 }
             }
             else if (gameEngine->getField()[i] & mask) {
-                paintPosition(pos, STATUS_HINT_SOLID);
+                paintPosition(pos, STATUS_HINT_SOLID, 0);
             }
         }
     }
@@ -289,7 +340,7 @@ void nonogame::restart() {
         for (int j = 0; j < width; ++j) {
             position = i * width + j;
             status.at(position) = STATUS_UNDECIDED;
-            paintPosition(position, status.at(position));
+            paintPosition(position, status.at(position), 0);
         }
     }
 }
@@ -341,17 +392,19 @@ void nonogame::redo() {
     return;
 }
 
-void nonogame::paintPosition(int position, int state)  {
+void nonogame::paintPosition(int position, int state, int mark)  {
+
+#define darkness 105
 
     switch (state) {
     case STATUS_UNDECIDED:
-        puzzle.at(position)->paint(paintValues.undecided, " ");
+        puzzle.at(position)->paint(paintValues.undecided.darker(mark*darkness), " ");
         break;
     case STATUS_SOLID:
-        puzzle.at(position)->paint(paintValues.solid, " ");
+        puzzle.at(position)->paint(paintValues.solid.darker(mark*darkness), " ");
         break;
     case STATUS_BLANK:
-        puzzle.at(position)->paint(paintValues.blank, "X");
+        puzzle.at(position)->paint(paintValues.blank.darker(mark*darkness), "X");
         break;
     case STATUS_HINT_BLANK:
         puzzle.at(position)->paint(paintValues.hint_blank);
@@ -377,7 +430,7 @@ void nonogame::setStatus(int position, int state, bool addUndo) {
     }
 
     status.at(position) = state;
-    paintPosition(position, state);
+    paintPosition(position, state, 0);
     return;
 }
 

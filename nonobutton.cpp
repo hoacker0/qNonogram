@@ -7,8 +7,8 @@ nonobutton_base::nonobutton_base(QWidget *parent) : QPushButton(parent)
     this->setStyle(style);
     setMinimumSize(DEFAULT_FIELD_SIZE, DEFAULT_FIELD_SIZE);
     setMaximumSize(DEFAULT_FIELD_SIZE, DEFAULT_FIELD_SIZE);
-
 }
+
 nonobutton_base::~nonobutton_base()
 {
     delete style;
@@ -37,8 +37,13 @@ void nonobutton_base::paint(QColor color, QString marker)
 nonobutton::nonobutton(QWidget *parent, int *b, bool *f) : nonobutton_base(parent), button(b), first(f)
 {
 	setAcceptDrops(true);
+    setMouseTracking(true);
     setStyleSheet("background-color: rgb(255, 255, 255)");
     processed = false;
+}
+
+void nonobutton::mouseMoveEvent(QMouseEvent *e){
+    emit mousemove();
 }
 
 void nonobutton::mousePressEvent(QMouseEvent *e)
