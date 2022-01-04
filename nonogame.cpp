@@ -240,6 +240,15 @@ QPoint nonogame::posKoords(int pos) {
 
 void nonogame::markPosition(QPoint pos, int mark) {
 
+    // yark hint labels
+    if (mark > 0) {
+        xAxis.at(pos.x())->setStyleSheet("QLabel { font-weight: bold; }");
+        yAxis.at(pos.y())->setStyleSheet("QLabel { font-weight: bold; }");
+    } else {
+        xAxis.at(pos.x())->setStyleSheet("QLabel { font-weight: regular; }");
+        yAxis.at(pos.y())->setStyleSheet("QLabel { font-weight: regular; }");
+    }
+
     // mark column
     for (int i = 0; i< height; i++) {
         int position =  pos.x() + i*width;
@@ -257,7 +266,7 @@ void nonogame::mouseMoved(int position) {
     if (lastMousePos != position) {
 
         // unmark old position
-        if (lastMousePos > 0) {
+        if (lastMousePos >= 0) {
             markPosition(posKoords(lastMousePos), 0);
         }
 
@@ -394,7 +403,7 @@ void nonogame::redo() {
 
 void nonogame::paintPosition(int position, int state, int mark)  {
 
-#define darkness 105
+#define darkness 108
 
     switch (state) {
     case STATUS_UNDECIDED:
