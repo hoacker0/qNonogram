@@ -117,6 +117,9 @@ void nonogame::startPuzzle() {
         }
         gameGrid->addWidget(xAxis.at(i), 0, i + spacer_x + 1);
     }
+
+    int maxLabelWidth = 0; // Fix width Problem with bold/regular fonts in windows
+
     for (int i = 0; i < height; ++i) {
         QString str = "";
         QString num = "";
@@ -126,12 +129,17 @@ void nonogame::startPuzzle() {
             str.append("  ");
         }
         yAxis.push_back(new QLabel(str));
+        maxLabelWidth = max(yAxis.at(i)->sizeHint().width(), maxLabelWidth);
         yAxis.at(i)->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
         if (i > 0 && i % 5 == 0) {
             ++spacer_y;
             gameGrid->setRowMinimumHeight(i + spacer_y, 2);
         }
         gameGrid->addWidget(yAxis.at(i), i + spacer_y + 1, 0);
+    }
+    for (int i = 0; i < height; ++i) {
+        // Resize all labels to a width that does not change during regular/bolt font switch
+        yAxis.at(i)->setFixedWidth(maxLabelWidth + 5);
     }
 
     // We need to map mouse events to the respective methods.
