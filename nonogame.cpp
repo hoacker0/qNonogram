@@ -139,7 +139,7 @@ void nonogame::startPuzzle() {
     }
     for (int i = 0; i < height; ++i) {
         // Resize all labels to a width that does not change during regular/bolt font switch
-        yAxis.at(i)->setFixedWidth(maxLabelWidth + 5);
+        yAxis.at(i)->setFixedWidth(1.1 * maxLabelWidth);
     }
 
     // We need to map mouse events to the respective methods.
