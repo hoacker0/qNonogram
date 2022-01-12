@@ -1,13 +1,13 @@
 GENERAL INFO:
-qNonogram is a puzzle game that will generate (semi)random nonogram puzzles, and allow the user to
+qnonogram is a puzzle game that will generate (semi)random nonogram puzzles, and allow the user to
 solve them. Please see https://en.wikipedia.org/wiki/Nonogram for more info on nonograms.
-qNonogram was initally forked from Nonogram-qt (https://github.com/dsuni/nonogram-qt).
+qnonogram was initally forked from Nonogram-qt (https://github.com/dsuni/nonogram-qt).
 
 DEPENDENCIES:
-qNonogram requires Qt5 to work.
+qnonogram requires Qt5 to work.
 
 LICENSE:
-qNonogram and all its components is distributed under the GNU GPL v3 (or later). Please see the file
+qnonogram and all its components is distributed under the GNU GPL v3 (or later). Please see the file
 "COPYING" for more details.
 
 INSTALLATION: 
